@@ -246,6 +246,29 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCyXuRBUfW-79krEPqWD1i2v3kJYm-6N44",
+        authDomain: "puantaj-51bda.firebaseapp.com",
+        databaseURL: "https://puantaj-51bda-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "puantaj-51bda",
+        storageBucket: "puantaj-51bda.firebasestorage.app",
+        messagingSenderId: "481343175496",
+        appId: "1:481343175496:web:2517f8d353d534783cd17d",
+        measurementId: "G-6J6EPDHXHC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    window.db = getDatabase(app);
+    window.ref = ref;
+    window.set = set;
+    window.onValue = onValue;
+
+    // Firebase yüklendikten sonra tabloyu çiz
+    tabloyuCiz(); 
+</script>
 </body>
 </html>
