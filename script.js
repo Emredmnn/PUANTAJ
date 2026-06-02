@@ -120,7 +120,7 @@ function TabloBasliklariniOlustur() {
     for (let i = 1; i <= toplamGunSayisi; i++) {
         const tarihObj = new Date(aktifYil, aktifAy - 1, i);
         const gunIndeks = tarihObj.getDay();
-        let ekstraSinif = (gunIndeks === 0 || gunIndeks === 6) ? "weekend" : "";
+        let倾斜Sinif = (gunIndeks === 0 || gunIndeks === 6) ? "weekend" : "";
         html += `<th class="day-th ${ekstraSinif}">${i} <span>${gunAdlari[gunIndeks]}</span></th>`;
     }
     baslikSatiri.innerHTML = html;
@@ -407,7 +407,6 @@ function personelDuzenleHazirlik(id) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Personel Silme İşlemi
 function personelSil(id) {
     if(confirm("Bu personeli ve tüm puantaj geçmişini silmek istediğinize emin misiniz?")) {
         db.ref("personeller/" + id).remove();
