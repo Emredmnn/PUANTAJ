@@ -1,9 +1,11 @@
-let otomasyonVerisi = JSON.parse(localStorage.getItem("hospital_catering_enterprise_v5.5")) || [];
+let DB_KEY = "hospital_catering_enterprise_v5.5";
+let otomasyonVerisi = JSON.parse(localStorage.getItem(DB_KEY)) || [];
 
 let seciliPersonelId = null;
 let seciliGun = null;
 let mevcutYil = 2026;
 let mevcutAy = 5; 
+let aktifFiltreDepartman = "HEPSİ"; // Varsayılan filtreleme kuralı
 
 // TÜRKİYE RESMİ TATİLLER TAKVİM MOTORU (Sabit Günler)
 const resmiTatiller = {
@@ -20,25 +22,61 @@ document.addEventListener("DOMContentLoaded", () => {
     const donemInput = document.getElementById("donemSecici");
     donemInput.value = `2026-06`;
     
+    const parts = donemInput.value.split("-");
+    mevcutYil = parseInt(parts[0]);
+    mevcutAy = parseInt(parts[1]) - 1;
+
     donemDegisti();
     saatiBaslat();
+
+    // ÇOKLU CİHAZ (MULTI-DEVICE) EŞZAMANLILIK KÖPRÜSÜ
+    // Farklı bir cihaz veya sekme veri güncellediğinde anında yakalar ve tabloyu yeniler
+    window.addEventListener('storage', (e) => {
+        if (e.key === DB_KEY) {
+            otomasyonVerisi = JSON.parse(e.newValue) || [];
+            tabloyuCiz();
+        }
+    });
+
+    window.onclick = function(event) {
+        const chefModal = document.getElementById("chefModal");
+        const perModal = document.getElementById("editPersonnelModal");
+        if (event.target == chefModal) modalKapat();
+        if (event.target == perModal) editPersonnelModalKapat();
+    }
 });
 
 function saatiBaslat() {
     const aylar = ["OCAK", "ŞUBAT", "MART", "NİSAN", "MAYIS", "HAZİRAN", "TEMMUZ", "AĞUSTOS", "EYLÜL", "EKİM", "KASIM", "ARALIK"];
+    const gunler = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
+    
     function saatiGuncelle() {
         const simdi = new Date();
         let s = simdi.getHours().toString().padStart(2, '0');
         let m = simdi.getMinutes().toString().padStart(2, '0');
         let sn = simdi.getSeconds().toString().padStart(2, '0');
-        document.getElementById("live-time").innerText = `${s}:${m}:${sn}`;
-        document.getElementById("live-date-day").innerText = simdi.getDate().toString().padStart(2, '0');
-        document.getElementById("live-date-month").innerText = aylar[simdi.getMonth()];
-        const gunler = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
-        document.getElementById("live-date-year").innerText = `${simdi.getFullYear()}, ${gunler[simdi.getDay()]}`;
+        
+        if(document.getElementById("live-time")) {
+            document.getElementById("live-time").innerText = `${s}:${m}:${sn}`;
+            document.getElementById("live-date-day").innerText = simdi.getDate().toString().padStart(2, '0');
+            document.getElementById("live-date-month").innerText = aylar[simdi.getMonth()];
+            document.getElementById("live-date-year").innerText = `${simdi.getFullYear()}, ${gunler[simdi.getDay()]}`;
+        }
     }
     saatiGuncelle();
     setInterval(saatiGuncelle, 1000);
+}
+
+// Departman butonlarına tıklandığında tetiklenen filtre fonksiyonu
+function filtreleDepartman(grupAdi, element) {
+    aktifFiltreDepartman = grupAdi;
+    
+    // Aktif buton rengini yönet
+    const buttons = document.querySelectorAll('.btn-filter');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    element.classList.add('active');
+    
+    tabloyuCiz();
 }
 
 function donemDegisti() {
@@ -53,7 +91,6 @@ function donemDegisti() {
 
 function ayinGunSayisi(yil, ay) { return new Date(yil, ay + 1, 0).getDate(); }
 
-// Resmi Tatil Kontrolü Yapan Yardımcı Fonksiyon
 function resmiTatilMi(ay, gun) {
     const key = `${ay}-${gun}`;
     return resmiTatiller[key] ? true : false;
@@ -69,7 +106,6 @@ function basliklariCiz() {
         const d = new Date(mevcutYil, mevcutAy, g);
         const th = document.createElement("th");
         
-        // Sınıflandırma: Önce Resmi Tatil mi, yoksa Hafta sonu mu?
         if (resmiTatilMi(mevcutAy, g)) {
             th.className = "day-th public-holiday";
             th.setAttribute("title", resmiTatiller[`${mevcutAy}-${g}`]);
@@ -88,11 +124,17 @@ function personelEkle() {
     const ad = document.getElementById("perAdSoyad").value.trim();
     const grup = document.getElementById("perGrup").value;
     if (!ad) { alert("Lütfen personel adı giriniz!"); return; }
+    
+    const donemKey = `${mevcutYil}-${mevcutAy}`;
     const yeniPersonel = {
-        id: Date.now(), ad: ad, grup: grup, donem: `${mevcutYil}-${mevcutAy}`, gunler: {}
+        id: Date.now(), ad: ad, grup: grup, donem: donemKey, gunler: {}
     };
+    
     const toplamGun = ayinGunSayisi(mevcutYil, mevcutAy);
-    for (let i = 1; i <= toplamGun; i++) { yeniPersonel.gunler[i] = { durum: "BOS", normalMesai: 0, fazlaMesai: 0 }; }
+    for (let i = 1; i <= toplamGun; i++) { 
+        yeniPersonel.gunler[i] = { durum: "BOS", normalMesai: 0, fazlaMesai: 0 }; 
+    }
+    
     otomasyonVerisi.push(yeniPersonel);
     veriyiKaydet();
     tabloyuCiz();
@@ -116,6 +158,7 @@ function personelDuzenleModaliAc(id) {
         document.getElementById("editPersonnelModal").style.display = "block";
     }
 }
+
 function editPersonnelModalKapat() { document.getElementById("editPersonnelModal").style.display = "none"; }
 
 function personelKartiniGuncelle() {
@@ -132,12 +175,11 @@ function personelKartiniGuncelle() {
     editPersonnelModalKapat();
 }
 
-// KRİTİK GÜNCELLEME: SADECE EKSTRA FAZLA MESAİLERİ TOPLAYAN ROZET MOTORU
 function toplamFazlaMesaiHesapla(personel) {
     let toplamFM = 0;
     Object.values(personel.gunler).forEach(g => {
         if(g.durum === "GELDI") {
-            toplamFM += g.fazlaMesai; // NormalMesai (9) tamamen elendi, sadece fazlaMesai toplanıyor
+            toplamFM += (parseInt(g.fazlaMesai) || 0);
         }
     });
     return toplamFM;
@@ -147,15 +189,27 @@ function tabloyuCiz() {
     const tbody = document.querySelector("#anaTablo tbody");
     tbody.innerHTML = "";
     const donemKey = `${mevcutYil}-${mevcutAy}`;
-    const buAyinPersonelleri = otomasyonVerisi.filter(p => p.donem === donemKey);
+    
+    // ÖNCE DÖNEME GÖRE FİLTRELE
+    let filtrelenmişList = otomasyonVerisi.filter(p => p.donem === donemKey);
+    
+    // SONRA BUTON İLE SEÇİLEN DEPARTMANA GÖRE FİLTRELE (Kritik İstek)
+    if (aktifFiltreDepartman !== "HEPSİ") {
+        filtrelenmişList = filtrelenmişList.filter(p => p.grup === aktifFiltreDepartman);
+    }
+
     const toplamGun = ayinGunSayisi(mevcutYil, mevcutAy);
 
-    buAyinPersonelleri.forEach(per => {
+    if (filtrelenmişList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${toplamGun + 1}" style="padding: 30px; color: var(--text-muted); font-weight: 500;">Bu kategoriye ait listelenecek personel bulunamadı.</td></tr>`;
+        return;
+    }
+
+    filtrelenmişList.forEach(per => {
         const tr = document.createElement("tr");
         const tdBilgi = document.createElement("td");
         tdBilgi.className = "sticky-col";
         
-        // Sadece Ekstra mesaileri hesaplatıp rozete basıyoruz
         const ekstraMesaiSaati = toplamFazlaMesaiHesapla(per);
 
         tdBilgi.innerHTML = `
@@ -181,7 +235,6 @@ function tabloyuCiz() {
             const d = new Date(mevcutYil, mevcutAy, g);
             const tdGun = document.createElement("td");
             
-            // Renklendirme Sınıf Ataması
             if (resmiTatilMi(mevcutAy, g)) tdGun.className = "public-holiday";
             else if(d.getDay() === 0 || d.getDay() === 6) tdGun.className = "weekend";
 
@@ -208,20 +261,24 @@ function tabloyuCiz() {
 function chefDüzenlemeModaliAc(perId, gun, veri) {
     seciliPersonelId = perId;
     seciliGun = gun;
-    const per = otomasyonVerisi.find(p => p.id === perId);
     document.getElementById("modalBaslik").innerText = `${gun}. Gün Düzenleme`;
     document.getElementById("modalDurum").value = veri.durum;
     document.getElementById("modalNormalMesai").value = veri.durum === "BOS" ? 9 : veri.normalMesai;
     document.getElementById("modalFazlaMesai").value = veri.fazlaMesai || 0;
-    durumDegisti(document.getElementById("modalDurum").value);
+    durumDegisti(veri.durum);
     document.getElementById("chefModal").style.display = "block";
 }
 
 function durumDegisti(durum) {
     const nAlani = document.getElementById("normalMesaiAlani");
     const fAlani = document.getElementById("fazlaMesaiAlani");
-    if (durum === "BOS" || durum !== "GELDI") { nAlani.style.display = "none"; fAlani.style.display = "none"; }
-    else { nAlani.style.display = "flex"; fAlani.style.display = "flex"; }
+    if (durum !== "GELDI") { 
+        nAlani.style.display = "none"; 
+        fAlani.style.display = "none"; 
+    } else { 
+        nAlani.style.display = "flex"; 
+        fAlani.style.display = "flex"; 
+    }
 }
 
 function modalKapat() { document.getElementById("chefModal").style.display = "none"; }
@@ -230,7 +287,9 @@ function gunlukVeriKaydet() {
     const yeniDurum = document.getElementById("modalDurum").value;
     let yeniNormal = parseInt(document.getElementById("modalNormalMesai").value) || 0;
     let yeniFazla = parseInt(document.getElementById("modalFazlaMesai").value) || 0;
+    
     if (yeniDurum !== "GELDI") { yeniNormal = 0; yeniFazla = 0; }
+    
     const per = otomasyonVerisi.find(p => p.id === seciliPersonelId);
     if (per) {
         per.gunler[seciliGun] = { durum: yeniDurum, normalMesai: yeniNormal, fazlaMesai: yeniFazla };
@@ -240,12 +299,17 @@ function gunlukVeriKaydet() {
     modalKapat();
 }
 
-function veriyiKaydet() { localStorage.setItem("hospital_catering_enterprise_v5.5", JSON.stringify(otomasyonVerisi)); }
+function veriyiKaydet() { 
+    localStorage.setItem(DB_KEY, JSON.stringify(otomasyonVerisi)); 
+}
 
 function excelAktar() {
     const donemKey = `${mevcutYil}-${mevcutAy}`;
-    const buAyinPersonelleri = otomasyonVerisi.filter(p => p.donem === donemKey);
-    if(buAyinPersonelleri.length === 0) { alert("Bu aya ait indirilecek veri bulunamadı!"); return; }
+    let buAyinPersonelleri = otomasyonVerisi.filter(p => p.donem === donemKey);
+    if(aktifFiltreDepartman !== "HEPSİ") {
+        buAyinPersonelleri = buAyinPersonelleri.filter(p => p.grup === aktifFiltreDepartman);
+    }
+    if(buAyinPersonelleri.length === 0) { alert("Bu kırılıma ait indirilecek veri bulunamadı!"); return; }
     const toplamGun = ayinGunSayisi(mevcutYil, mevcutAy);
     
     let excelData = [];
@@ -266,5 +330,5 @@ function excelAktar() {
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(excelData);
     XLSX.utils.book_append_sheet(wb, ws, "Puantaj Raporu");
-    XLSX.writeFile(wb, `ISS_Catering_Maliyet_Raporu_${mevcutYil}_${mevcutAy + 1}.xlsx`);
+    XLSX.writeFile(wb, `ED_Yazilim_Maliyet_Raporu_${aktifFiltreDepartman}_${mevcutYil}.xlsx`);
 }
