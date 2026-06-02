@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emre Duman Yazılım | Enterprise Puantaj Otomasyonu</title>
+    <title>ISS Catering - Akıllı Puantaj Otomasyonu</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -15,150 +14,148 @@
         
         <aside class="sidebar">
             <div class="brand">
-                <img src="./logo.png.png" alt="Emre Duman Yazılım Logo" class="brand-img-logo-premium">
+                <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=150&q=80" alt="ISS Logo" class="brand-img-logo-premium">
                 <div class="brand-text">
-                    <h3>EMRE DUMAN</h3>
-                    <p>YAZILIM</p>
+                    <h3>ISS CATERING</h3>
+                    <p>OTOMASYON SİSTEMİ</p>
                 </div>
             </div>
 
             <div class="sidebar-section">
-                <h4><i class="fa-solid fa-calendar-check"></i> Çalışma Dönemi</h4>
+                <h4>Çalışma Dönemi</h4>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <input type="month" id="donemSecici" onchange="donemDegisti()">
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h4>Yeni Personel Ekle</h4>
                 <div class="sidebar-form">
                     <div class="input-wrapper">
-                        <i class="fa-solid fa-calendar-days" style="position: absolute; left: 14px; color: #475569; z-index: 10;"></i>
-                        <input type="month" id="donemSecici" onchange="donemDegisti()" style="padding-left: 40px;">
-                    </div>
-                </div>
-            </div>
-
-            <div class="sidebar-section">
-                <h4><i class="fa-solid fa-sitemap"></i> Görev Alanları</h4>
-                <div class="role-menu" id="roleFilterMenu">
-                    <button class="role-btn active" onclick="görevFiltrele('HEPSİ')"><i class="fa-solid fa-users"></i> Tüm Personeller</button>
-                    <button class="role-btn" onclick="görevFiltrele('Üretim Personeli')"><i class="fa-solid fa-kitchen-set"></i> Mutfak / Üretim</button>
-                    <button class="role-btn" onclick="görevFiltrele('Garson')"><i class="fa-solid fa-bell-concierge"></i> Servis / Garson</button>
-                    <button class="role-btn" onclick="görevFiltrele('Bulaşıkhane Personeli')"><i class="fa-solid fa-soap"></i> Bulaşıkhane</button>
-                    <button class="role-btn" onclick="görevFiltrele('Şef Garson')"><i class="fa-solid fa-user-tie"></i> Şef Garsonlar</button>
-                    <button class="role-btn" onclick="görevFiltrele('Depo Personeli')"><i class="fa-solid fa-cubes"></i> Depo Yönetimi</button>
-                </div>
-            </div>
-
-            <div class="sidebar-section">
-                <h4><i class="fa-solid fa-clock-rotate-left"></i> Denetim Kayıtları</h4>
-                <button class="action-btn-secondary" onclick="logModalAc()">
-                    <i class="fa-solid fa-bell"></i> Mesai Değişim Günlüğü
-                </button>
-            </div>
-
-            <div class="sidebar-section">
-                <h4><i class="fa-solid fa-user-gear"></i> Personel Tanımlama</h4>
-                <div class="sidebar-form">
-                    <div class="input-wrapper">
-                        <i class="fa-solid fa-user"></i>
-                        <input type="text" id="perAdSoyad" placeholder="Ad Soyad Giriniz">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <input type="text" id="perAdSoyad" placeholder="Adı Soyadı">
                     </div>
                     <div class="input-wrapper">
-                        <i class="fa-solid fa-briefcase"></i>
+                        <i class="fa-solid fa-users-gear"></i>
                         <select id="perGrup">
-                            <option value="Üretim Personeli">Mutfak / Üretim</option>
-                            <option value="Garson">Servis / Garson</option>
-                            <option value="Bulaşıkhane Personeli">Bulaşıkhane</option>
-                            <option value="Şef Garson">Şef Garson</option>
-                            <option value="Depo Personeli">Depo Yönetimi</option>
+                            <option value="MUTFAK">Mutfak Kadrosu</option>
+                            <option value="SERVİS">Servis Kadrosu</option>
+                            <option value="DEPO">Depo Sorumlusu</option>
+                            <option value="YÖNETİM">Yönetim / Şef</option>
                         </select>
                     </div>
-                    <button onclick="personelEkle()" class="btn-primary">
-                        <i class="fa-solid fa-plus"></i> Yeni Personel Tanımla
+                    <button class="btn-primary" onclick="personelEkle()">
+                        <i class="fa-solid fa-plus"></i> Personel Tanımla
                     </button>
                 </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h4>Departman Filtresi</h4>
+                <div class="role-menu">
+                    <button class="role-btn active" onclick="görevFiltrele('HEPSİ')">
+                        <i class="fa-solid fa-layer-group"></i> Tüm Personel
+                    </button>
+                    <button class="role-btn" onclick="görevFiltrele('MUTFAK')">
+                        <i class="fa-solid fa-kitchen-set"></i> Mutfak Kadrosu
+                    </button>
+                    <button class="role-btn" onclick="görevFiltrele('SERVİS')">
+                        <i class="fa-solid fa-bell-concierge"></i> Servis Kadrosu
+                    </button>
+                    <button class="role-btn" onclick="görevFiltrele('DEPO')">
+                        <i class="fa-solid fa-boxes-stacked"></i> Depo Sorumluları
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-section" style="margin-top: 15px;">
+                <button class="action-btn-secondary" onclick="logModalAc()">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Mesai Değişim Günlüğü
+                </button>
             </div>
 
             <div class="sidebar-footer">
                 <div class="status-indicator">
-                    <span class="pulse-dot"></span>
-                    <p>Otomatik Canlı Kayıt Aktif</p>
+                    <div class="pulse-dot"></div>
+                    <span style="color:#10b981; font-weight:600;">Firebase Realtime DB Bağlı</span>
                 </div>
-                <span>v6.5.0 Enterprise</span>
+                <p>EDepoStokTakibi © 2026</p>
+                <p>v2.4 Premium Live Edition</p>
             </div>
         </aside>
 
         <main class="main-content">
+            
             <header class="top-header">
                 <div class="header-title">
-                    <h1 id="panelAnaBaslik">Aylık Personel Devam Çizelgesi</h1>
-                    <p>ED YAZILIM</p>
+                    <h1 id="panelAnaBaslik">Aylık Personel Puantaj Paneli</h1>
+                    <p>Hastaneler Grubu Canlı Vardiya ve Fazla Mesai İzleme Ekranı</p>
                 </div>
                 
-                <div class="action-group" style="display: flex; gap: 20px; align-items: center;">
-                    <button onclick="excelAktar()" class="btn-excel">
-                        <i class="fa-solid fa-file-excel"></i> Excel Raporu Al (.XLSX)
-                    </button>
-
-                    <div class="premium-clock-widget">
-                        <div class="widget-date-block">
-                            <span id="live-date-day">01</span>
-                            <div>
-                                <span id="live-date-month">HAZİRAN</span>
-                                <span id="live-date-year">2026, Pazartesi</span>
-                            </div>
+                <div class="premium-clock-widget">
+                    <div class="widget-date-block">
+                        <span id="live-date-day">00</span>
+                        <div>
+                            <span id="live-date-month">OCAK</span>
+                            <span id="live-date-year">2026, Pazar</span>
                         </div>
-                        <div class="widget-time-block">
-                            <span id="live-time">22:00:00</span>
-                        </div>
+                    </div>
+                    <div class="widget-time-block">
+                        <span id="live-time">00:00:00</span>
                     </div>
                 </div>
             </header>
 
-            <div class="puantaj-card" style="margin-bottom: 30px;">
+            <section class="puantaj-card">
                 <div class="table-responsive">
                     <table id="anaTablo">
                         <thead>
                             <tr id="tabloBaslikSatiri">
-                                <th class="sticky-col">Personel & Görev Dağılımı</th>
                                 </tr>
                         </thead>
                         <tbody>
                             </tbody>
                     </table>
                 </div>
-            </div>
+            </section>
 
-            <div class="report-section-title">
-                <h3><i class="fa-solid fa-chart-line"></i> Dönem Operasyonel Veri Analiz Raporu</h3>
-                <p>Aktif filtrelenmiş alandaki personellerin toplam istatistik dökümleri</p>
-            </div>
-            
-            <div class="stats-grid-container">
+            <section class="report-section-title">
+                <h3><i class="fa-solid fa-chart-pie" style="color:var(--primary);"></i> Dönem Sonu Operasyonel Özet Raporları</h3>
+                <p>Filtrelenen departmana ait anlık sistem verileri ve toplam hakediş kırılımları</p>
+            </section>
+
+            <section class="stats-grid-container">
                 <div class="stat-report-card">
                     <div class="stat-icon orange"><i class="fa-solid fa-business-time"></i></div>
                     <div class="stat-info">
                         <h3 id="repTotalFM">0 Saat</h3>
-                        <p>Toplam Fazla Mesai (+)</p>
+                        <p>Toplam Fazla Mesai</p>
                     </div>
                 </div>
                 <div class="stat-report-card">
                     <div class="stat-icon green"><i class="fa-solid fa-user-check"></i></div>
                     <div class="stat-info">
                         <h3 id="repTotalG">0 Gün</h3>
-                        <p>Toplam Fiili Çalışma (G)</p>
+                        <p>Toplam Toplam Mesai</p>
                     </div>
                 </div>
                 <div class="stat-report-card">
-                    <div class="stat-icon purple"><i class="fa-solid fa-file-waveform"></i></div>
+                    <div class="stat-icon purple"><i class="fa-solid fa-house-medical-flag"></i></div>
                     <div class="stat-info">
                         <h3 id="repTotalR">0 Gün</h3>
-                        <p>Toplam Sağlık Raporu (R)</p>
+                        <p>Toplam Raporlu Gün</p>
                     </div>
                 </div>
                 <div class="stat-report-card">
                     <div class="stat-icon blue"><i class="fa-solid fa-plane-departure"></i></div>
                     <div class="stat-info">
                         <h3 id="repTotalIzin">0 Gün</h3>
-                        <p>Toplam İzin Çeşitleri (H.İ/Y.İ/C.İ)</p>
+                        <p>Toplam İzinli Gün</p>
                     </div>
                 </div>
-            </div>
+            </section>
+
         </main>
     </div>
 
@@ -166,109 +163,111 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title-group">
-                    <i class="fa-solid fa-pen-to-square"></i>
-                    <h3 id="modalBaslik">Gün Düzenleme</h3>
+                    <i class="fa-solid fa-user-gear" style="color:var(--primary);"></i>
+                    <span id="modalBaslik">Gün Düzenleme</span>
                 </div>
                 <span class="close-btn" onclick="modalKapat()">&times;</span>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Durum Seçimi</label>
+                    <label>Puantaj Durumu</label>
                     <select id="modalDurum" onchange="durumDegisti(this.value)">
-                        <option value="BOS">⚪ Veri Girilmedi (Boş Bırak)</option>
-                        <option value="GELDI">🟢 Geldi (G)</option>
-                        <option value="GELMEDI">🔴 Gelmedi (YOK)</option>
-                        <option value="H_IZIN">🟡 Haftalık İzin (H.İ)</option>
-                        <option value="Y_IZIN">🔵 Yıllık İzin (Y.İ)</option>
-                        <option value="C_IZIN">⚫ Cenaze İzini (C.İ)</option>
-                        <option value="RAPOR">🟣 Sağlık Raporu (R)</option>
+                        <option value="BOS">Seçim Yok (-)</option>
+                        <option value="GELDI">GELDİ (Çalıştı)</option>
+                        <option value="GELMEDI">GELMEDİ (YOK)</option>
+                        <option value="H_IZIN">Haftalık İzin (H.İ)</option>
+                        <option value="Y_IZIN">Yıllık İzin (Y.İ)</option>
+                        <option value="C_IZIN">Ücretsiz İzin (C.İ)</option>
+                        <option value="RAPOR">Raporlu (R)</option>
                     </select>
                 </div>
-                <div class="form-group" id="normalMesaiAlani">
+                <div class="form-group" id="normalMesaiAlani" style="display:none;">
                     <label>Normal Çalışma Saati</label>
-                    <input type="number" id="modalNormalMesai" min="0" max="24" value="9">
+                    <input type="number" id="modalNormalMesai" value="9">
                 </div>
-                <div class="form-group" id="fazlaMesaiAlani">
+                <div class="form-group" id="fazlaMesaiAlani" style="display:none;">
                     <label>Fazla Mesai Saati (+)</label>
-                    <input type="number" id="modalFazlaMesai" min="0" max="24" value="0">
+                    <input type="number" id="modalFazlaMesai" value="0">
                 </div>
-                <button class="btn-save" onclick="gunlukVeriKaydet()">
-                    <i class="fa-solid fa-check"></i> Değişiklikleri İşle
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="editPersonnelModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header" style="background: #1e293b;">
-                <div class="modal-title-group" style="color: white;">
-                    <i class="fa-solid fa-user-pen"></i>
-                    <h3>Personel Kartını Düzenle</h3>
-                </div>
-                <span class="close-btn" onclick="editPersonnelModalKapat()" style="color: #94a3b8;">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Ad Soyad</label>
-                    <input type="text" id="editPerAdSoyad">
-                </div>
-                <div class="form-group">
-                    <label>Görev / Departman</label>
-                    <select id="editPerGrup">
-                        <option value="Üretim Personeli">Mutfak / Üretim</option>
-                        <option value="Garson">Servis / Garson</option>
-                        <option value="Bulaşıkhane Personeli">Bulaşıkhane</option>
-                        <option value="Şef Garson">Şef Garson</option>
-                        <option value="Depo Personeli">Depo Yönetimi</option>
-                    </select>
-                </div>
-                <button class="btn-save" onclick="personelKartiniGuncelle()" style="background: #3b82f6;">
-                    <i class="fa-solid fa-rotate"></i> Bilgileri Güncelle
-                </button>
+                <button class="btn-save" onclick="gunlukVeriKaydet()">Değişiklikleri Buluta Kaydet</button>
             </div>
         </div>
     </div>
 
     <div id="logModal" class="modal">
-        <div class="modal-content" style="width: 450px; max-height: 80vh; overflow-y: auto;">
-            <div class="modal-header" style="background: #0f172a; color: white;">
+        <div class="modal-content" style="width: 450px; max-width:95%;">
+            <div class="modal-header">
                 <div class="modal-title-group">
-                    <i class="fa-solid fa-list-check"></i>
-                    <h3>Sistem Hareket Kayıtları</h3>
+                    <i class="fa-solid fa-clock-rotate-left" style="color:var(--primary);"></i>
+                    <span>Sistem Denetim Günlüğü</span>
                 </div>
-                <span class="close-btn" onclick="logModalKapat()" style="color: #94a3b8;">&times;</span>
+                <span class="close-btn" onclick="logModalKapat()">&times;</span>
+            </div>
+            <div class="modal-body" id="logListesi" style="max-height: 350px; overflow-y: auto;">
+                </div>
+        </div>
+    </div>
+
+    <div id="editPersonnelModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <i class="fa-solid fa-user-pen" style="color:var(--primary);"></i>
+                    <span>Personel Kartını Güncelle</span>
+                </div>
+                <span class="close-btn" onclick="editPersonnelModalKapat()">&times;</span>
             </div>
             <div class="modal-body">
-                <div id="logListesi" class="log-container">
-                    </div>
+                <div class="form-group">
+                    <label>Adı Soyadı</label>
+                    <input type="text" id="editPerAdSoyad">
+                </div>
+                <div class="form-group">
+                    <label>Departman / Grup</label>
+                    <select id="editPerGrup">
+                        <option value="MUTFAK">Mutfak Kadrosu</option>
+                        <option value="SERVİS">Servis Kadrosu</option>
+                        <option value="DEPO">Depo Sorumlusu</option>
+                        <option value="YÖNETİM">Yönetim / Şef</option>
+                    </select>
+                </div>
+                <button class="btn-save" style="background:#3b82f6;" onclick="personelKartiniGuncelle()">Kartı Güncelle</button>
             </div>
         </div>
     </div>
 
+    <div id="mesaiDetayModal" class="modal">
+        <div class="modal-content" style="width: 420px; max-width:95%;">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <i class="fa-solid fa-business-time" style="color:#ef4444;"></i>
+                    <span id="mesaiDetayBaslik">Personel Mesai Geçmişi</span>
+                </div>
+                <span class="close-btn" onclick="mesaiDetayModalKapat()">&times;</span>
+            </div>
+            <div class="modal-body" id="mesaiDetayListesi" style="max-height: 350px; overflow-y: auto;">
+                </div>
+        </div>
+    </div>
+
     <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyCyXuRBUfW-79krEPqWD1i2v3kJYm-6N44",
-        authDomain: "puantaj-51bda.firebaseapp.com",
-        databaseURL: "https://puantaj-51bda-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "puantaj-51bda",
-        storageBucket: "puantaj-51bda.firebasestorage.app",
-        messagingSenderId: "481343175496",
-        appId: "1:481343175496:web:2517f8d353d534783cd17d",
-        measurementId: "G-6J6EPDHXHC"
-    };
+        const firebaseConfig = {
+            databaseURL: "https://emre-duman-puantaj-default-rtdb.firebaseio.com"
+        };
 
-    const app = initializeApp(firebaseConfig);
-    window.db = getDatabase(app);
-    window.ref = ref;
-    window.set = set;
-    window.onValue = onValue;
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-    // Firebase yüklendikten sonra tabloyu çiz
-    tabloyuCiz(); 
-</script>
+        // Fonksiyonları küresel hafızaya (window) bağlayıp script.js erişimine açıyoruz (Kritik Köprü)
+        window.db = db;
+        window.ref = ref;
+        window.set = set;
+        window.onValue = onValue;
+    </script>
+
+    <script src="script.js"></script>
 </body>
 </html>
