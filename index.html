@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EMRE DUMAN | YAZILIM</title>
+    <title>ED YAZILIM | Cloud Puantaj Otomasyonu</title>
     
     <link rel="stylesheet" href="style.css?v=1.4">
-    
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -26,7 +25,7 @@
                 </div>
                 <div class="brand-text">
                     <h3>ED YAZILIM</h3>
-                    <p>DEVAM ÇİZELGESİ</p>
+                    <p>Puantaj Otomasyonu</p>
                 </div>
             </div>
 
@@ -34,7 +33,7 @@
                 <h4><i class="fa-solid fa-calendar-check"></i> Çalışma Dönemi</h4>
                 <div class="sidebar-form">
                     <div class="input-wrapper">
-                        <i class="fa-solid fa-calendar-days" style="position: absolute; left: 14px; top:14px; color: #475569; z-index: 10;"></i>
+                        <i class="fa-solid fa-calendar-days" style="position: absolute; left: 14px; top:14px; color: #9ca3af; z-index: 10;"></i>
                         <input type="month" id="donemSecici" onchange="donemDegisti()" style="padding-left: 40px;">
                     </div>
                 </div>
@@ -45,11 +44,11 @@
                 <div class="sidebar-form">
                     <input type="hidden" id="editPersonelId" value="">
                     <div class="input-wrapper">
-                        <i class="fa-solid fa-user" style="position: absolute; left: 14px; top:14px; color:#475569;"></i>
+                        <i class="fa-solid fa-user" style="position: absolute; left: 14px; top:14px; color:#9ca3af;"></i>
                         <input type="text" id="perAdSoyad" placeholder="Ad Soyad Giriniz" style="padding-left: 40px;">
                     </div>
                     <div class="input-wrapper">
-                        <i class="fa-solid fa-briefcase" style="position: absolute; left: 14px; top:14px; color:#475569;"></i>
+                        <i class="fa-solid fa-briefcase" style="position: absolute; left: 14px; top:14px; color:#9ca3af;"></i>
                         <select id="perGrup" style="padding-left: 40px;">
                             <option value="Üretim Personeli">Mutfak / Üretim</option>
                             <option value="Garson">Servis / Garson</option>
@@ -82,8 +81,8 @@
         <main class="main-content">
             <header class="top-header">
                 <div class="header-title">
-                    <h1>Aylık Personel Devam Çizelgesi</h1>
-                    <p>Proje Puantajı</p>
+                    <h1>Aylık Personel Puantaj Paneli</h1>
+                    <p>Eşzamanlı mobil görünüm, veri filtreleme va anlık senkronizasyon</p>
                 </div>
                 
                 <div class="action-group">
@@ -113,7 +112,7 @@
             <div class="filter-container">
                 <span class="filter-label"><i class="fa-solid fa-sliders"></i> Departman Filtrele:</span>
                 <div class="filter-buttons-group" id="departmanFiltreGrubu">
-                    <button class="btn-filter active" onclick="filtreleDepartman('HEPSİ', this)">Tüm Personeller</button>
+                    <button class="btn-filter active" onclick="filtreleDepartman('HEPSİ', this)">Herkesi Göster</button>
                     <button class="btn-filter" onclick="filtreleDepartman('Üretim Personeli', this)">Mutfak / Üretim</button>
                     <button class="btn-filter" onclick="filtreleDepartman('Garson', this)">Servis / Garson</button>
                     <button class="btn-filter" onclick="filtreleDepartman('Bulaşıkhane Personeli', this)">Bulaşıkhane</button>
@@ -132,7 +131,6 @@
                     <i class="fa-solid fa-magnifying-glass search-icon"></i>
                     <input type="text" id="panelAramaKutusu" oninput="aramaYap()" placeholder="Personel ad soyad yazarak hızlı ara...">
                 </div>
-
                 <div class="table-responsive">
                     <table id="anaTablo">
                         <thead>
@@ -167,7 +165,7 @@
             <div class="modal-body">
                 <input type="hidden" id="modalPersonelId" value="">
                 <input type="hidden" id="modalGunNo" value="">
-                <p style="margin-bottom: 14px; font-weight: 700; color: #2563eb; font-size:0.9rem;" id="modalTarihBilgi"></p>
+                <p style="margin-bottom: 14px; font-weight: 700; color: #f97316; font-size:0.9rem;" id="modalTarihBilgi"></p>
                 
                 <div class="form-group">
                     <label>Durum Seçimi</label>
@@ -198,12 +196,12 @@
 
     <div id="mesaiDetayModal" class="modal">
         <div class="modal-content" style="width: 92%; max-width: 440px; border-radius: 24px; margin: 12% auto;">
-            <div class="modal-header" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; padding: 20px 24px;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #1f2937, #111827); color: white; padding: 20px 24px;">
                 <div class="modal-title-group" style="color: white;">
-                    <i class="fa-solid fa-clock-history" style="color: #3b82f6;"></i>
+                    <i class="fa-solid fa-clock-history" style="color: #f97316;"></i>
                     <div>
                         <h3 id="detayModalPersonelAdi" style="font-size: 1.1rem;">Personel Mesai Geçmişi</h3>
-                        <p id="detayModalDonemYazi" style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px;">Dönem Detay Listesi</p>
+                        <p id="detayModalDonemYazi" style="font-size: 0.75rem; color: #9ca3af; margin-top: 2px;">Dönem Detay Listesi</p>
                     </div>
                 </div>
                 <span class="close-btn" onclick="mesaiDetayModalKapat()">&times;</span>
@@ -216,7 +214,7 @@
 
     <div id="gelmeyenlerModal" class="modal">
         <div class="modal-content" style="width: 92%; max-width: 460px; border-radius: 20px;">
-            <div class="modal-header" style="background: #f87171; color: white;">
+            <div class="modal-header" style="background: #ef4444; color: white;">
                 <div class="modal-title-group" style="color: white;">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                     <div>
