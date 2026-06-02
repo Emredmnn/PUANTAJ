@@ -15,11 +15,13 @@
         
         <aside class="sidebar">
             <div class="brand">
-                <img src="logo.png.png" alt="ED YAZILIM Logo" class="brand-logo-img" onerror="this.style.display='none'; document.getElementById('logo-backup').style.display='flex';">
-                <div id="logo-backup" class="logo-icon" style="display:none;"><i class="fa-solid fa-code"></i></div>
+                <div class="logo-wrapper">
+                    <img src="logo.png.png" alt="ED YAZILIM Logo" class="brand-logo-img" onerror="this.style.display='none'; document.getElementById('logo-backup').style.display='flex';">
+                    <div id="logo-backup" class="logo-icon" style="display:none;"><i class="fa-solid fa-code"></i></div>
+                </div>
                 <div class="brand-text">
                     <h3>ED YAZILIM</h3>
-                    <p>Puantaj Otomasyon Sistemi</p>
+                    <p>Puantaj Otomasyonu</p>
                 </div>
             </div>
 
@@ -61,7 +63,7 @@
                     <span class="pulse-dot"></span>
                     <p>Bulut Eşitleme Aktif (Multi-Device)</p>
                 </div>
-                <span>v5.6.0 Enterprise</span>
+                <span>v5.6.1 Enterprise</span>
             </div>
         </aside>
 
@@ -94,7 +96,7 @@
 
             <div class="filter-container">
                 <span class="filter-label"><i class="fa-solid fa-sliders"></i> Departman Filtrele:</span>
-                <div class="filter-buttons-group" id="departmanFiltre Grubu">
+                <div class="filter-buttons-group" id="departmanFiltreGrubu">
                     <button class="btn-filter active" onclick="filtreleDepartman('HEPSİ', this)">Herkesi Göster</button>
                     <button class="btn-filter" onclick="filtreleDepartman('Üretim Personeli', this)">Mutfak / Üretim</button>
                     <button class="btn-filter" onclick="filtreleDepartman('Garson', this)">Servis / Garson</button>
