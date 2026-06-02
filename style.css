@@ -40,7 +40,7 @@ body { background-color: var(--main-bg); color: var(--text-dark); overflow-x: hi
 }
 .brand { display: flex; width: 100%; align-items: center; padding-bottom: 25px; border-bottom: 1px solid #1e293b; margin-bottom: 10px; }
 
-/* LOGO BÜYÜTME KATMANI */
+/* LOGO KUTUSU - PENCEREYE TAM SIĞACAK BÜYÜK BOYUT AYARI */
 .logo-wrapper { 
     display: flex;
     align-items: center;
