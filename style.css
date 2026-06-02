@@ -48,7 +48,7 @@ body { background-color: var(--main-bg); color: var(--text-dark); }
 .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 20px; }
 .header-title h1 { font-size: 1.75rem; font-weight: 700; color: var(--text-dark); }
 .header-title p { font-size: 0.95rem; color: var(--text-muted); margin-top: 4px; }
-.action-group { display: flex; gap: 20px; align-items: center; }
+.action-group { display: flex; gap: 12px; align-items: center; }
 
 /* FILTER */
 .filter-container { background: var(--card-bg); border-radius: 14px; padding: 15px 20px; margin-bottom: 25px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px; }
@@ -57,7 +57,17 @@ body { background-color: var(--main-bg); color: var(--text-dark); }
 .btn-filter { background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
 .btn-filter.active { background: var(--primary); border-color: var(--primary); color: white; }
 
-.btn-excel { background: var(--excel-color); color: white; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15); }
+.btn-excel { background: var(--excel-color); color: white; border: none; padding: 12px 18px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15); font-size: 0.88rem; }
+
+/* GELMEYENLER BUTONU SAKALASI */
+.btn-absent { background: #ef4444; color: white; border: none; padding: 12px 18px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15); font-size: 0.88rem; }
+.btn-absent:hover { background: #dc2626; }
+
+/* ARAMA ÇUBUĞU TASARIMI */
+.table-search-bar { display: flex; align-items: center; background: #f8fafc; padding: 14px 20px; border-bottom: 1px solid var(--border-color); position: relative; }
+.search-icon { color: #94a3b8; font-size: 1.05rem; position: absolute; left: 24px; }
+.table-search-bar input { width: 100%; border: 1px solid #e2e8f0; padding: 10px 16px 10px 42px; border-radius: 10px; font-size: 0.92rem; outline: none; background: white; color: var(--text-dark); transition: all 0.2s ease; }
+.table-search-bar input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
 
 /* CLOCK */
 .premium-clock-widget { background: #0f172a; border-radius: 14px; display: flex; overflow: hidden; border: 1px solid #1e293b; }
@@ -97,9 +107,6 @@ td.sticky-col { background: white; }
 .day-btn.C_IZIN { background-color: var(--bg-cizin); color: var(--text-cizin); border: 1px solid var(--border-cizin); }
 .day-btn.RAPOR { background-color: var(--bg-rapor); color: var(--text-rapor); border: 1px solid var(--border-rapor); }
 
-/* GİZLEME DETAYLARI */
-.mobile-day-selector-container, .mobile-view-only { display: none; }
-
 /* MODAL GENEL */
 .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); }
 .modal-content { background-color: white; margin: 8% auto; border-radius: 20px; width: 380px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15); overflow: hidden; border: 1px solid var(--border-color); }
@@ -122,10 +129,6 @@ td.sticky-col { background: white; }
 .status-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
 .status-badge.G_GELDI { background: var(--bg-geldi); color: var(--text-geldi); }
 .status-badge.G_GELMEDI { background: var(--bg-gelmedi); color: var(--text-gelmedi); }
-.status-badge.G_H_IZIN { background: var(--bg-hizin); color: var(--text-hizin); }
-.status-badge.G_Y_IZIN { background: var(--bg-yizin); color: var(--text-yizin); }
-.status-badge.G_C_IZIN { background: var(--bg-cizin); color: var(--text-cizin); }
-.status-badge.G_RAPOR { background: var(--bg-rapor); color: var(--text-rapor); }
 
 .normal-saat-yazi { color: #475569; background: #e2e8f0; padding: 3px 6px; border-radius: 6px; }
 .fazla-saat-yazi { color: #16a34a; background: rgba(34, 197, 94, 0.12); padding: 3px 6px; border-radius: 6px; border: 1px solid var(--border-geldi); }
@@ -137,11 +140,10 @@ td.sticky-col { background: white; }
     .sidebar-footer { margin-top: 15px; padding-top: 10px; }
     .main-content { padding: 16px; }
     .top-header { flex-direction: column; align-items: flex-start; gap: 15px; }
-    .action-group { width: 100%; justify-content: space-between; }
+    .action-group { width: 100%; justify-content: space-between; flex-wrap: wrap; }
     .filter-container { flex-direction: column; align-items: flex-start; gap: 10px; width: 100%; }
     
     .desktop-view-only { display: none; }
-    
     .mobile-day-selector-container { display: block; background: #ffffff; border-radius: 14px; padding: 12px; margin-bottom: 16px; border: 1px solid var(--border-color); }
     .mobile-selector-title { font-size: 0.8rem; font-weight: 700; color: var(--text-dark); display: block; margin-bottom: 10px; }
     
