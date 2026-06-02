@@ -120,7 +120,7 @@ function TabloBasliklariniOlustur() {
     for (let i = 1; i <= toplamGunSayisi; i++) {
         const tarihObj = new Date(aktifYil, aktifAy - 1, i);
         const gunIndeks = tarihObj.getDay();
-        let倾斜Sinif = (gunIndeks === 0 || gunIndeks === 6) ? "weekend" : "";
+        let ekstraSinif = (gunIndeks === 0 || gunIndeks === 6) ? "weekend" : "";
         html += `<th class="day-th ${ekstraSinif}">${i} <span>${gunAdlari[gunIndeks]}</span></th>`;
     }
     baslikSatiri.innerHTML = html;
@@ -343,7 +343,7 @@ function GelmeyenSayisiniGuncelle() {
 }
 
 // =========================================================================
-// 6. PERSONEL ARAMA, SEÇME VE YÖNETİM MOTORLARI
+// 6. PERSONEL ARAMA, SEÇME VE YÖNETİM MOTORLARI (AKTİFLEŞTİRİLDİ)
 // =========================================================================
 function aramaYap() {
     const aramaMetni = document.getElementById("panelAramaKutusu").value.toLowerCase().trim();
@@ -360,9 +360,12 @@ function aramaYapMobil() {
     const aramaMetni = document.getElementById("mobilAramaKutusu").value.toLowerCase().trim();
     const kartlar = document.querySelectorAll("#mobilKartKapsayici .mobile-personnel-card");
     kartlar.forEach(kart => {
-        const isimHucresi = kart.querySelector(".mobile-card-info strong");
+        const isimHucresi = kart.querySelector("strong");
         if (isimHucresi) {
-            kart.style.display = isimHucresi.innerText.toLowerCase().includes(aramaMetni) ? "" : "none";
+            kart.style.display = 'none';
+            if(isimHucresi.innerText.toLowerCase().includes(aramaMetni)){
+                kart.style.display = '';
+            }
         }
     });
 }
@@ -487,14 +490,14 @@ function mesaiDetayModaliAc(perId) {
         listeAlani.innerHTML = `
         <div style="background:#f8fafc; padding:12px; border-radius:12px; margin-bottom:14px; display:flex; justify-content:space-between; border:1px solid #e2e8f0;">
             <div><span style="font-size:11px; color:#64748b; display:block;">Normal Mesai</span><strong style="color:#1e293b; font-size:15px;">${toplamCalisma} Sa</strong></div>
-            <div><span style="font-size:11px; color:#64748b; display:block;">Toplam FM</span><strong style="color:#16a34a; font-size:15px;">+${toplamFazla} Sa</strong></div>
+            <div><span style="font-size:11px; color:#64748b; display:block;">Toplam FM</span><strong style="color:#16a34a; font-size:15px;">+${toprakFazla || toplamFazla} Sa</strong></div>
         </div>` + satirHtml;
     }
     document.getElementById("mesaiDetayModal").style.display = "block";
 }
 
 // =========================================================================
-// 8. EXCEL RAPORLAMA VE SAAT MOTORLARI
+// 8. EXCEL RAPORLAMA VE SAAT MOTORLARI (AKTİFLEŞTİRİLDİ)
 // =========================================================================
 function excelAktar() {
     if (Object.keys(tumKullanicilar).length === 0) { alert("Rapora aktarılacak personel verisi bulunamadı!"); return; }
