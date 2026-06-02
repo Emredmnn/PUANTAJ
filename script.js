@@ -5,9 +5,9 @@ let seciliPersonelId = null;
 let seciliGun = null;
 let mevcutYil = 2026;
 let mevcutAy = 5; 
-let aktifFiltreDepartman = "HEPSİ"; // Varsayılan filtreleme kuralı
+let aktifFiltreDepartman = "HEPSİ";
 
-// TÜRKİYE RESMİ TATİLLER TAKVİM MOTORU (Sabit Günler)
+// Resmi Tatil Motoru
 const resmiTatiller = {
     "0-1": "Yılbaşı",
     "3-23": "Ulusal Egemenlik ve Çocuk Bayramı",
@@ -29,8 +29,8 @@ document.addEventListener("DOMContentLoaded", () => {
     donemDegisti();
     saatiBaslat();
 
-    // ÇOKLU CİHAZ (MULTI-DEVICE) EŞZAMANLILIK KÖPRÜSÜ
-    // Farklı bir cihaz veya sekme veri güncellediğinde anında yakalar ve tabloyu yeniler
+    // GERÇEK ZAMANLI ÇOKLU CİHAZ SENKRONİZASYON KÖPRÜSÜ
+    // Herhangi bir cihazda veya sekmede veri değiştiğinde, diğer cihazlarda sayfa yenilenmeden tablo güncellenir.
     window.addEventListener('storage', (e) => {
         if (e.key === DB_KEY) {
             otomasyonVerisi = JSON.parse(e.newValue) || [];
@@ -67,11 +67,11 @@ function saatiBaslat() {
     setInterval(saatiGuncelle, 1000);
 }
 
-// Departman butonlarına tıklandığında tetiklenen filtre fonksiyonu
+// Departman Buton Filtreleyici Mekanizması
 function filtreleDepartman(grupAdi, element) {
     aktifFiltreDepartman = grupAdi;
     
-    // Aktif buton rengini yönet
+    // Butonların aktiflik durumunu yönet
     const buttons = document.querySelectorAll('.btn-filter');
     buttons.forEach(btn => btn.classList.remove('active'));
     element.classList.add('active');
@@ -190,22 +190,22 @@ function tabloyuCiz() {
     tbody.innerHTML = "";
     const donemKey = `${mevcutYil}-${mevcutAy}`;
     
-    // ÖNCE DÖNEME GÖRE FİLTRELE
-    let filtrelenmişList = otomasyonVerisi.filter(p => p.donem === donemKey);
+    // 1. Kural: Döneme göre filtreleme yap
+    let filtrelenmisList = otomasyonVerisi.filter(p => p.donem === donemKey);
     
-    // SONRA BUTON İLE SEÇİLEN DEPARTMANA GÖRE FİLTRELE (Kritik İstek)
+    // 2. Kural: Buton ile seçilen departmana göre filtreleme yap
     if (aktifFiltreDepartman !== "HEPSİ") {
-        filtrelenmişList = filtrelenmişList.filter(p => p.grup === aktifFiltreDepartman);
+        filtrelenmisList = filtrelenmisList.filter(p => p.grup === aktifFiltreDepartman);
     }
 
     const toplamGun = ayinGunSayisi(mevcutYil, mevcutAy);
 
-    if (filtrelenmişList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="${toplamGun + 1}" style="padding: 30px; color: var(--text-muted); font-weight: 500;">Bu kategoriye ait listelenecek personel bulunamadı.</td></tr>`;
+    if (filtrelenmisList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${toplamGun + 1}" style="padding: 30px; color: var(--text-muted); font-weight: 500;">Bu kategoride kayıtlı personel bulunamadı.</td></tr>`;
         return;
     }
 
-    filtrelenmişList.forEach(per => {
+    filtrelenmisList.forEach(per => {
         const tr = document.createElement("tr");
         const tdBilgi = document.createElement("td");
         tdBilgi.className = "sticky-col";
@@ -218,12 +218,12 @@ function tabloyuCiz() {
                     <div style="font-weight:700; color:var(--text-dark); font-size:0.95rem;">${per.ad}</div>
                     <div style='color:var(--text-muted); font-size:0.75rem; font-weight:600; margin-top:2px;'>${per.grup}</div>
                 </div>
-                <div class="total-hours-badge" title="Bu Ayki Toplam Fazla Mesai Saati">+${ekstraMesaiSaati} Sa</div>
+                <div class="total-hours-badge" title="Toplam Fazla Mesai Saati">+${ekstraMesaiSaati} Sa</div>
                 <div class="cell-actions">
-                    <button onclick="personelDuzenleModaliAc(${per.id})" class="btn-per-edit" title="İsim/Görev Düzenle">
+                    <button onclick="personelDuzenleModaliAc(${per.id})" class="btn-per-edit" title="Düzenle">
                         <i class="fa-solid fa-user-pen"></i>
                     </button>
-                    <button onclick="personelSil(${per.id})" class="btn-per-delete" title="Personeli Sil">
+                    <button onclick="personelSil(${per.id})" class="btn-per-delete" title="Sil">
                         <i class="fa-solid fa-user-xmark"></i>
                     </button>
                 </div>
@@ -309,7 +309,7 @@ function excelAktar() {
     if(aktifFiltreDepartman !== "HEPSİ") {
         buAyinPersonelleri = buAyinPersonelleri.filter(p => p.grup === aktifFiltreDepartman);
     }
-    if(buAyinPersonelleri.length === 0) { alert("Bu kırılıma ait indirilecek veri bulunamadı!"); return; }
+    if(buAyinPersonelleri.length === 0) { alert("İndirilecek veri bulunamadı!"); return; }
     const toplamGun = ayinGunSayisi(mevcutYil, mevcutAy);
     
     let excelData = [];
@@ -330,5 +330,5 @@ function excelAktar() {
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(excelData);
     XLSX.utils.book_append_sheet(wb, ws, "Puantaj Raporu");
-    XLSX.writeFile(wb, `ED_Yazilim_Maliyet_Raporu_${aktifFiltreDepartman}_${mevcutYil}.xlsx`);
+    XLSX.writeFile(wb, `ED_Yazilim_Puantaj_Raporu_${aktifFiltreDepartman}.xlsx`);
 }
