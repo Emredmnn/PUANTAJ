@@ -28,7 +28,7 @@ window.onload = function() {
     SaatVeTarihMotoru();
     FirebaseBaglantiDurumuDinle();
     
-    // Varsayılan olarak içinde bulunulan ayı ata (Örn: 2026-06)
+    // Varsayılan olarak içinde bulunulan ayı ata
     const bugun = new Date();
     const buAyStr = bugun.getFullYear() + "-" + String(bugun.getMonth() + 1).padStart(2, '0');
     document.getElementById("donemSecici").value = buAyStr;
@@ -64,7 +64,6 @@ function donemDegisti() {
     aktifYil = parseInt(parts[0]);
     aktifAy = parseInt(parts[1]);
 
-    // Seçilen ayın kaç gün çektiğini bul (28, 29, 30, 31)
     toplamGunSayisi = new Date(aktifYil, aktifAy, 0).getDate();
     if (mobilSeciliGun > toplamGunSayisi) mobilSeciliGun = toplamGunSayisi;
 
@@ -107,7 +106,7 @@ function aramaYapMobil() {
     });
 }
 
-// Ortak Departman Filtreleme Motoru (Hem Masaüstü Hem Mobil Listeyi Tetikler)
+// Ortak Departman Filtreleme Motoru
 function filtreleDepartman(deptName, butonElement) {
     secilenDepartman = deptName;
     const butonlar = document.querySelectorAll("#departmanFiltreGrubu .btn-filter");
@@ -212,7 +211,6 @@ function TabloGövdesiniDoldur() {
         const fMesai = ToplamFazlaMesaiHesapla(p, donemKey);
         let satirHtml = `<tr>`;
         
-        // Sabit sütun - Rozet düzenlemesi uygulandı (Örn: "4 Saat")
         satirHtml += `
             <td class="sticky-col">
                 <div class="personnel-cell-wrapper">
@@ -342,7 +340,6 @@ function personelDuzenleHazirlik(id) {
     document.getElementById("perGrup").value = p.departman;
     document.getElementById("btnPersonelSubmit").innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Değişiklikleri Güncelle`;
     
-    // Mobilde ise formu görebilmesi için yukarı kaydır
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -353,7 +350,7 @@ function personelSil(id) {
     }
 }
 
-// Günlük Hücre Tıklama Modalı (Masaüstü ve Mobil Ortak Kullanır)
+// Günlük Hücre Tıklama Modalı
 function durumSecimPenceresi(perId, gunNo) {
     const p = tumKullanicilar[perId];
     document.getElementById("modalPersonelId").value = perId;
@@ -433,7 +430,7 @@ function GelmeyenSayisiniGuncelle() {
     document.getElementById("gelmeyenButonMetni").innerText = `Gelmeyenler (${gelmeyenSayisi})`;
 }
 
-// GÜNCELLEME: İşe Gelmeyenler Modaline Tarih ve Tüm İzin Türleri Entegre Edildi
+// İşe Gelmeyenler Modaline Tarih ve Tüm İzin Türleri Entegre Edildi
 function gelmeyenlerModaliAc() {
     const listeAlani = document.getElementById("gelmeyenlerSirketListesi");
     if(!listeAlani) return;
@@ -442,11 +439,9 @@ function gelmeyenlerModaliAc() {
     const ayAdlari = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
     const gunAdlari = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
     
-    // Seçili günün tam tarihini ve gün adını hesapla
     const seciliTarihObj = new Date(aktifYil, aktifAy - 1, mobilSeciliGun);
     const gunAdi = gunAdlari[seciliTarihObj.getDay()];
     
-    // Modal başlığındaki tarihi dinamik yapıyoruz
     document.getElementById("gelmeyenlerModalTarih").innerText = `${mobilSeciliGun} ${ayAdlari[aktifAy - 1]} ${aktifYil}, ${gunAdi}`;
 
     const donemKey = aktifYil + "_" + String(aktifAy).padStart(2, '0');
@@ -459,12 +454,10 @@ function gelmeyenlerModaliAc() {
         const pDonemi = p.puantaj && p.puantaj[donemKey] ? p.puantaj[donemKey] : {};
         const durum = pDonemi[mobilSeciliGun] ? pDonemi[mobilSeciliGun].durum : "BOS";
 
-        // Sadece GELDI veya BOS olmayanları (yani eksik/izinli olan tüm listeyi) yakalıyoruz
         if (durum !== "GELDI" && durum !== "BOS") {
             sayac++;
             
             let durumRozeti = "";
-            // İzin ve gelmeme durumlarına göre kurumsal rozet stilleri oluşturuyoruz
             if (durum === "GELMEDI") {
                 durumRozeti = `<span style="background:#fee2e2; color:#ef4444; font-size:11px; font-weight:700; padding:4px 8px; border-radius:6px;">GELMEDİ</span>`;
             } else if (durum === "H_IZIN") {
@@ -499,7 +492,7 @@ function gelmeyenlerModaliAc() {
 
 function gelmeyenlerModalKapat() { document.getElementById("gelmeyenlerModal").style.display = "none"; }
 
-// GÜNCELLEME: İSMİN ÜSTÜNE TIKLANDIĞINDA SADECE MESAİ GİRİLENLERİ LİSTELEYEN MESAİ RAPORU MODALI
+// Personel İsminin Üstüne Tıklandığında Açılan Detay Modali
 function mesaiDetayModaliAc(perId) {
     const p = tumKullanicilar[perId];
     document.getElementById("detayModalPersonelAdi").innerText = p.adSoyad;
@@ -521,7 +514,6 @@ function mesaiDetayModaliAc(perId) {
     for (let i = 1; i <= toplamGunSayisi; i++) {
         const kayit = pDonemi[i] || { durum: "BOS", normalMesai: 0, fazlaMesai: 0 };
         
-        // FİLTRELEME: Sadece GELDI olan ve saat verisi barındıran mesailer listelenir.
         if (kayit.durum !== "GELDI" || (parseInt(kayit.normalMesai) === 0 && parseInt(kayit.fazlaMesai) === 0)) {
             continue; 
         }
@@ -561,7 +553,7 @@ function mesaiDetayModaliAc(perId) {
 
 function mesaiDetayModalKapat() { document.getElementById("mesaiDetayModal").style.display = "none"; }
 
-// Canlı Premium Saat Sistemi
+// Canlı Saat ve Tarih Sistemi
 function SaatVeTarihMotoru() {
     const aylar = ["OCAK", "ŞUBAT", "MART", "NİSAN", "MAYIS", "HAZİRAN", "TEMMUZ", "AĞUSTOS", "EYLÜL", "EKİM", "KASIM", "ARALIK"];
     const gunler = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
@@ -577,7 +569,7 @@ function SaatVeTarihMotoru() {
     }, 1000);
 }
 
-// Şirket Standartlarında Excel Çıktı Motoru
+// Kurumsal Standartlarda Excel Çıktı Motoru
 function excelAktar() {
     if (Object.keys(tumKullanicilar).length === 0) { alert("Rapora aktarılacak personel verisi bulunamadı!"); return; }
     
