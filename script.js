@@ -7,15 +7,30 @@ let mevcutYil = 2026;
 let mevcutAy = 5; 
 let aktifFiltreDepartman = "HEPSİ";
 
-// Resmi Tatil Motoru
+// 2026 YILI TÜM RESMİ VE DİNİ BAYRAMLAR MOTORU (Arefeler Dahil)
+// JavaScript Ay yapısı 0'dan başlar (Ocak=0, Haziran=5 vb.)
 const resmiTatiller = {
+    // Sabit Resmi Tatiller
     "0-1": "Yılbaşı",
     "3-23": "Ulusal Egemenlik ve Çocuk Bayramı",
     "4-1": "Emek ve Dayanışma Günü",
     "4-19": "Atatürk'ü Anma, Gençlik ve Spor Bayramı",
     "6-15": "Demokrasi ve Milli Birlik Günü",
     "7-30": "Zafer Bayramı",
-    "9-29": "Cumhuriyet Bayramı"
+    "9-29": "Cumhuriyet Bayramı",
+
+    // 2026 Dini Bayramlar (Ramazan Bayramı)
+    "2-19": "Ramazan Bayramı Arefesi (Yarım Gün)",
+    "2-20": "Ramazan Bayramı 1. Gün",
+    "2-21": "Ramazan Bayramı 2. Gün",
+    "2-22": "Ramazan Bayramı 3. Gün",
+
+    // 2026 Dini Bayramlar (Kurban Bayramı)
+    "4-26": "Kurban Bayramı Arefesi (Yarım Gün)",
+    "4-27": "Kurban Bayramı 1. Gün",
+    "4-28": "Kurban Bayramı 2. Gün",
+    "4-29": "Kurban Bayramı 3. Gün",
+    "4-30": "Kurban Bayramı 4. Gün"
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -29,8 +44,6 @@ document.addEventListener("DOMContentLoaded", () => {
     donemDegisti();
     saatiBaslat();
 
-    // GERÇEK ZAMANLI ÇOKLU CİHAZ SENKRONİZASYON KÖPRÜSÜ
-    // Herhangi bir cihazda veya sekmede veri değiştiğinde, diğer cihazlarda sayfa yenilenmeden tablo güncellenir.
     window.addEventListener('storage', (e) => {
         if (e.key === DB_KEY) {
             otomasyonVerisi = JSON.parse(e.newValue) || [];
@@ -41,8 +54,10 @@ document.addEventListener("DOMContentLoaded", () => {
     window.onclick = function(event) {
         const chefModal = document.getElementById("chefModal");
         const perModal = document.getElementById("editPersonnelModal");
+        const detayModal = document.getElementById("mesaiDetayModal");
         if (event.target == chefModal) modalKapat();
         if (event.target == perModal) editPersonnelModalKapat();
+        if (event.target == detayModal) mesaiDetayModalKapat();
     }
 });
 
@@ -67,15 +82,11 @@ function saatiBaslat() {
     setInterval(saatiGuncelle, 1000);
 }
 
-// Departman Buton Filtreleyici Mekanizması
 function filtreleDepartman(grupAdi, element) {
     aktifFiltreDepartman = grupAdi;
-    
-    // Butonların aktiflik durumunu yönet
     const buttons = document.querySelectorAll('.btn-filter');
     buttons.forEach(btn => btn.classList.remove('active'));
     element.classList.add('active');
-    
     tabloyuCiz();
 }
 
@@ -185,15 +196,63 @@ function toplamFazlaMesaiHesapla(personel) {
     return toplamFM;
 }
 
+// YENİ: MESAİ DETAY PENCERESİNİ AÇAN VE VERİLERİ LİSTELEYEN MOTOR
+function mesaiDetayModaliAc(personelId) {
+    const per = otomasyonVerisi.find(p => p.id === personelId);
+    if (!per) return;
+
+    const aylar = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+    document.getElementById("detayModalPersonelAdi").innerText = per.ad;
+    document.getElementById("detayModalDonemYazi").innerText = `${aylar[mevcutAy]} ${mevcutYil} - Detaylı Mesai Raporu`;
+
+    const listeKapsayici = document.getElementById("mesaiDetayListesi");
+    listeKapsayici.innerHTML = "";
+
+    let mesaiVarMi = false;
+    const toplamGun = ayinGunSayisi(mevcutYil, mevcutAy);
+
+    for (let g = 1; g <= toplamGun; g++) {
+        const gunVeri = per.gunler[g];
+        if (gunVeri && gunVeri.durum === "GELDI" && (gunVeri.fazlaMesai > 0 || gunVeri.normalMesai > 0)) {
+            mesaiVarMi = true;
+            
+            const gunSatiri = document.createElement("div");
+            gunSatiri.className = "mesai-detay-item";
+            
+            // Eğer o gün resmi veya dini bayram ise yanına not yaz
+            let bayramNotu = "";
+            if (resmiTatilMi(mevcutAy, g)) {
+                bayramNotu = `<span class="bayram-etiket" title="${resmiTatiller[mevcutAy+'-'+g]}">Bayram</span>`;
+            }
+
+            gunSatiri.innerHTML = `
+                <div class="detay-tarih"><strong>${g.toString().padStart(2, '0')}.${(mevcutAy + 1).toString().padStart(2, '0')}.${mevcutYil}</strong> ${bayramNotu}</div>
+                <div class="detay-saatler">
+                    <span class="normal-saat-yazi">${gunVeri.normalMesai} Sa Normal</span>
+                    <span class="fazla-saat-yazi">+${gunVeri.fazlaMesai} Sa F.Mesai</span>
+                </div>
+            `;
+            listeKapsayici.appendChild(gunSatiri);
+        }
+    }
+
+    if (!mesaiVarMi) {
+        listeKapsayici.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:0.9rem; font-weight:500;"><i class="fa-solid fa-circle-info" style="display:block; font-size:1.5rem; margin-bottom:8px; color:#94a3b8;"></i>Bu ay için girilmiş mesai kaydı bulunamadı.</div>`;
+    }
+
+    document.getElementById("mesaiDetayModal").style.display = "block";
+}
+
+function mesaiDetayModalKapat() {
+    document.getElementById("mesaiDetayModal").style.display = "none";
+}
+
 function tabloyuCiz() {
     const tbody = document.querySelector("#anaTablo tbody");
     tbody.innerHTML = "";
     const donemKey = `${mevcutYil}-${mevcutAy}`;
     
-    // 1. Kural: Döneme göre filtreleme yap
     let filtrelenmisList = otomasyonVerisi.filter(p => p.donem === donemKey);
-    
-    // 2. Kural: Buton ile seçilen departmana göre filtreleme yap
     if (aktifFiltreDepartman !== "HEPSİ") {
         filtrelenmisList = filtrelenmisList.filter(p => p.grup === aktifFiltreDepartman);
     }
@@ -212,13 +271,14 @@ function tabloyuCiz() {
         
         const ekstraMesaiSaati = toplamFazlaMesaiHesapla(per);
 
+        // DEĞİŞİKLİK: .total-hours-badge elemanına tıklama özelliği (onclick="mesaiDetayModaliAc") entegre edildi.
         tdBilgi.innerHTML = `
             <div class="personnel-cell-wrapper">
                 <div class="personnel-info">
                     <div style="font-weight:700; color:var(--text-dark); font-size:0.95rem;">${per.ad}</div>
                     <div style='color:var(--text-muted); font-size:0.75rem; font-weight:600; margin-top:2px;'>${per.grup}</div>
                 </div>
-                <div class="total-hours-badge" title="Toplam Fazla Mesai Saati">+${ekstraMesaiSaati} Sa</div>
+                <div class="total-hours-badge" onclick="mesaiDetayModaliAc(${per.id})" title="Detaylı Mesai Geçmişini Görmek İçin Tıklayın" style="cursor:pointer;">+${ekstraMesaiSaati} Sa</div>
                 <div class="cell-actions">
                     <button onclick="personelDuzenleModaliAc(${per.id})" class="btn-per-edit" title="Düzenle">
                         <i class="fa-solid fa-user-pen"></i>
