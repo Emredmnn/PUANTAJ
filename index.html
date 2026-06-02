@@ -14,7 +14,7 @@
         
         <aside class="sidebar">
             <div class="brand">
-                <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=150&q=80" alt="ISS Logo" class="brand-img-logo-premium">
+                <img src="./logo.png.png" alt="ISS Logo" class="brand-img-logo-premium">
                 <div class="brand-text">
                     <h3>ISS CATERING</h3>
                     <p>OTOMASYON SİSTEMİ</p>
@@ -30,7 +30,25 @@
             </div>
 
             <div class="sidebar-section">
-                <h4>Yeni Personel Ekle</h4>
+                <h4>Departman Filtresi</h4>
+                <div class="role-menu">
+                    <button class="role-btn active" id="btn-filtre-hepsi" onclick="görevFiltrele('HEPSİ')">
+                        <i class="fa-solid fa-layer-group"></i> Tüm Personel
+                    </button>
+                    <button class="role-btn" id="btn-filtre-uretim" onclick="görevFiltrele('Üretim Personeli')">
+                        <i class="fa-solid fa-kitchen-set"></i> Mutfak / Üretim
+                    </button>
+                    <button class="role-btn" id="btn-filtre-garson" onclick="görevFiltrele('Garson')">
+                        <i class="fa-solid fa-bell-concierge"></i> Servis / Garson
+                    </button>
+                    <button class="role-btn" id="btn-filtre-depo" onclick="görevFiltrele('Depo Personeli')">
+                        <i class="fa-solid fa-boxes-stacked"></i> Depo Yönetimi
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h4>Yeni Personel Tanımla</h4>
                 <div class="sidebar-form">
                     <div class="input-wrapper">
                         <i class="fa-solid fa-user-plus"></i>
@@ -39,32 +57,13 @@
                     <div class="input-wrapper">
                         <i class="fa-solid fa-users-gear"></i>
                         <select id="perGrup">
-                            <option value="MUTFAK">Mutfak Kadrosu</option>
-                            <option value="SERVİS">Servis Kadrosu</option>
-                            <option value="DEPO">Depo Sorumlusu</option>
-                            <option value="YÖNETİM">Yönetim / Şef</option>
+                            <option value="Üretim Personeli">Mutfak / Üretim</option>
+                            <option value="Garson">Servis / Garson</option>
+                            <option value="Depo Personeli">Depo Yönetimi</option>
                         </select>
                     </div>
                     <button class="btn-primary" onclick="personelEkle()">
-                        <i class="fa-solid fa-plus"></i> Personel Tanımla
-                    </button>
-                </div>
-            </div>
-
-            <div class="sidebar-section">
-                <h4>Departman Filtresi</h4>
-                <div class="role-menu">
-                    <button class="role-btn active" onclick="görevFiltrele('HEPSİ')">
-                        <i class="fa-solid fa-layer-group"></i> Tüm Personel
-                    </button>
-                    <button class="role-btn" onclick="görevFiltrele('MUTFAK')">
-                        <i class="fa-solid fa-kitchen-set"></i> Mutfak Kadrosu
-                    </button>
-                    <button class="role-btn" onclick="görevFiltrele('SERVİS')">
-                        <i class="fa-solid fa-bell-concierge"></i> Servis Kadrosu
-                    </button>
-                    <button class="role-btn" onclick="görevFiltrele('DEPO')">
-                        <i class="fa-solid fa-boxes-stacked"></i> Depo Sorumluları
+                        <i class="fa-solid fa-plus"></i> Personel Ekle
                     </button>
                 </div>
             </div>
@@ -78,10 +77,10 @@
             <div class="sidebar-footer">
                 <div class="status-indicator">
                     <div class="pulse-dot"></div>
-                    <span style="color:#10b981; font-weight:600;">Firebase Realtime DB Bağlı</span>
+                    <span style="color:#10b981; font-weight:600;">Realtime Database Bağlı</span>
                 </div>
                 <p>EDepoStokTakibi © 2026</p>
-                <p>v2.4 Premium Live Edition</p>
+                <p>v2.5 Premium Architecture</p>
             </div>
         </aside>
 
@@ -90,15 +89,15 @@
             <header class="top-header">
                 <div class="header-title">
                     <h1 id="panelAnaBaslik">Aylık Personel Puantaj Paneli</h1>
-                    <p>Hastaneler Grubu Canlı Vardiya ve Fazla Mesai İzleme Ekranı</p>
+                    <p>Hastaneler Grubu Canlı Vardiya ve Fazla Mesai Takip Sistemi</p>
                 </div>
                 
                 <div class="premium-clock-widget">
                     <div class="widget-date-block">
-                        <span id="live-date-day">00</span>
+                        <span id="live-date-day">02</span>
                         <div>
-                            <span id="live-date-month">OCAK</span>
-                            <span id="live-date-year">2026, Pazar</span>
+                            <span id="live-date-month">HAZİRAN</span>
+                            <span id="live-date-year">2026</span>
                         </div>
                     </div>
                     <div class="widget-time-block">
@@ -121,8 +120,7 @@
             </section>
 
             <section class="report-section-title">
-                <h3><i class="fa-solid fa-chart-pie" style="color:var(--primary);"></i> Dönem Sonu Operasyonel Özet Raporları</h3>
-                <p>Filtrelenen departmana ait anlık sistem verileri ve toplam hakediş kırılımları</p>
+                <h3><i class="fa-solid fa-chart-pie" style="color:var(--primary);"></i> Dönem Sonu Operasyonel Özet</h3>
             </section>
 
             <section class="stats-grid-container">
@@ -137,7 +135,7 @@
                     <div class="stat-icon green"><i class="fa-solid fa-user-check"></i></div>
                     <div class="stat-info">
                         <h3 id="repTotalG">0 Gün</h3>
-                        <p>Toplam Toplam Mesai</p>
+                        <p>Toplam Mesai Gün</p>
                     </div>
                 </div>
                 <div class="stat-report-card">
@@ -145,13 +143,6 @@
                     <div class="stat-info">
                         <h3 id="repTotalR">0 Gün</h3>
                         <p>Toplam Raporlu Gün</p>
-                    </div>
-                </div>
-                <div class="stat-report-card">
-                    <div class="stat-icon blue"><i class="fa-solid fa-plane-departure"></i></div>
-                    <div class="stat-info">
-                        <h3 id="repTotalIzin">0 Gün</h3>
-                        <p>Toplam İzinli Gün</p>
                     </div>
                 </div>
             </section>
@@ -175,9 +166,6 @@
                         <option value="BOS">Seçim Yok (-)</option>
                         <option value="GELDI">GELDİ (Çalıştı)</option>
                         <option value="GELMEDI">GELMEDİ (YOK)</option>
-                        <option value="H_IZIN">Haftalık İzin (H.İ)</option>
-                        <option value="Y_IZIN">Yıllık İzin (Y.İ)</option>
-                        <option value="C_IZIN">Ücretsiz İzin (C.İ)</option>
                         <option value="RAPOR">Raporlu (R)</option>
                     </select>
                 </div>
@@ -203,36 +191,7 @@
                 </div>
                 <span class="close-btn" onclick="logModalKapat()">&times;</span>
             </div>
-            <div class="modal-body" id="logListesi" style="max-height: 350px; overflow-y: auto;">
-                </div>
-        </div>
-    </div>
-
-    <div id="editPersonnelModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title-group">
-                    <i class="fa-solid fa-user-pen" style="color:var(--primary);"></i>
-                    <span>Personel Kartını Güncelle</span>
-                </div>
-                <span class="close-btn" onclick="editPersonnelModalKapat()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Adı Soyadı</label>
-                    <input type="text" id="editPerAdSoyad">
-                </div>
-                <div class="form-group">
-                    <label>Departman / Grup</label>
-                    <select id="editPerGrup">
-                        <option value="MUTFAK">Mutfak Kadrosu</option>
-                        <option value="SERVİS">Servis Kadrosu</option>
-                        <option value="DEPO">Depo Sorumlusu</option>
-                        <option value="YÖNETİM">Yönetim / Şef</option>
-                    </select>
-                </div>
-                <button class="btn-save" style="background:#3b82f6;" onclick="personelKartiniGuncelle()">Kartı Güncelle</button>
-            </div>
+            <div class="modal-body" id="logListesi" style="max-height: 350px; overflow-y: auto;"></div>
         </div>
     </div>
 
@@ -251,21 +210,27 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
-            databaseURL: "https://emre-duman-puantaj-default-rtdb.firebaseio.com"
+            apiKey: "AIzaSyCyXuRBUfW-79krEPqWD1i2v3kJYm-6N44",
+            authDomain: "puantaj-51bda.firebaseapp.com",
+            databaseURL: "https://puantaj-51bda-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "puantaj-51bda",
+            storageBucket: "puantaj-51bda.firebasestorage.app",
+            messagingSenderId: "481343175496",
+            appId: "1:481343175496:web:2517f8d353d534783cd17d"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Fonksiyonları küresel hafızaya (window) bağlayıp script.js erişimine açıyoruz (Kritik Köprü)
+        // Kilitlerin açılmasını sağlayan küresel bağlantılar (window nesnesi üzerinden script.js'e aktarım)
         window.db = db;
-        window.ref = ref;
-        window.set = set;
-        window.onValue = onValue;
+        window.firebaseRef = ref;
+        window.firebaseSet = set;
+        window.firebaseOnValue = onValue;
     </script>
 
     <script src="script.js"></script>
