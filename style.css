@@ -9,7 +9,7 @@
     --primary: #2563eb;
     --excel-color: #10b981;
 
-    /* Takvim Renk Tanımları */
+    /* Takvim ve Bayram Renk Tanımları */
     --bg-weekend: #e2e8f0;       
     --bg-holiday: #ffe4e6;       
     --text-holiday: #9f1239;
@@ -27,30 +27,12 @@
 body { background-color: var(--main-bg); color: var(--text-dark); }
 .dashboard-container { display: flex; min-height: 100vh; }
 
-/* SOL ÜST SABİT MARKA ALANI CSS YAPILANDIRMASI */
+/* SOL ÜST LOGO ALANI */
 .sidebar { width: 300px; background-color: var(--sidebar-bg); color: white; padding: 30px 24px; display: flex; flex-direction: column; shrink: 0; }
 .brand { display: flex; align-items: center; gap: 14px; padding-bottom: 25px; border-bottom: 1px solid #1e293b; margin-bottom: 10px; }
 
-/* Taşmayı ve kaymayı engelleyen logo kapsayıcı kartı */
-.logo-wrapper {
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #171e2e;
-    border-radius: 12px;
-    padding: 4px;
-    border: 1px solid #222f43;
-    overflow: hidden;
-    shrink: 0;
-}
-.brand-logo-img { 
-    max-width: 100%; 
-    max-height: 100%; 
-    object-fit: contain; 
-}
-
+.logo-wrapper { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: #171e2e; border-radius: 12px; padding: 4px; border: 1px solid #222f43; overflow: hidden; shrink: 0; }
+.brand-logo-img { max-width: 100%; max-height: 100%; object-fit: contain; }
 .logo-icon { background: linear-gradient(135deg, #3b82f6, #2563eb); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
 .brand-text h3 { font-size: 1.15rem; font-weight: 700; margin: 0; letter-spacing: -0.02em; color: #ffffff; }
 .brand-text p { font-size: 0.72rem; color: #3b82f6; margin-top: 1px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
@@ -80,7 +62,7 @@ body { background-color: var(--main-bg); color: var(--text-dark); }
 .header-title h1 { font-size: 1.75rem; font-weight: 700; color: var(--text-dark); letter-spacing: -0.03em; }
 .header-title p { font-size: 0.95rem; color: var(--text-muted); margin-top: 4px; }
 
-/* DEPARTMAN FİLTRE BAR GRUBU */
+/* DEPARTMAN FİLTRE BAR */
 .filter-container { background: var(--card-bg); border-radius: 14px; padding: 15px 20px; margin-bottom: 25px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px; }
 .filter-label { font-size: 0.85rem; font-weight: 700; color: var(--text-dark); white-space: nowrap; }
 .filter-buttons-group { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -101,7 +83,7 @@ body { background-color: var(--main-bg); color: var(--text-dark); }
 .widget-time-block { padding: 10px 20px; display: flex; align-items: center; justify-content: center; background: #0f172a; min-width: 110px; }
 #live-time { font-size: 1.25rem; font-weight: 700; color: #10b981; font-family: monospace; letter-spacing: 0.05em; }
 
-/* TABLO STİLLERİ */
+/* TABLO VE PUANTAJ */
 .puantaj-card { background: var(--card-bg); border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04); border: 1px solid var(--border-color); overflow: hidden; }
 .table-responsive { overflow-x: auto; width: 100%; }
 table { width: 100%; border-collapse: collapse; table-layout: fixed; }
@@ -119,7 +101,10 @@ td.sticky-col { background: white; }
 
 .personnel-cell-wrapper { display: flex; justify-content: space-between; align-items: center; width: 100%; }
 .personnel-info { flex-grow: 1; }
-.total-hours-badge { background: #fef2f2; color: #ef4444; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; border: 1px solid #fee2e2; white-space: nowrap; margin-right: 5px; }
+
+/* Dinamik Güncellenen Premium Saat Rozeti */
+.total-hours-badge { background: #fee2e2; color: #dc2626; padding: 5px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; border: 1px solid #fca5a5; white-space: nowrap; margin-right: 8px; transition: all 0.2s ease-in-out; }
+.total-hours-badge:hover { background: #dc2626; color: white; border-color: #dc2626; transform: scale(1.05); box-shadow: 0 4px 10px rgba(220, 38, 38, 0.2); }
 
 .cell-actions { display: flex; gap: 2px; }
 .btn-per-edit, .btn-per-delete { background: transparent; border: none; cursor: pointer; padding: 6px; border-radius: 6px; transition: all 0.2s; }
@@ -153,3 +138,12 @@ td.sticky-col { background: white; }
 .form-group input, .form-group select { padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 0.95rem; outline: none; }
 .btn-save { width: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
 .btn-save:hover { opacity: 0.9; }
+
+/* YENİ: MESAİ GEÇMİŞİ LİSTE TASARIMI */
+.mesai-detay-listesi { display: flex; flex-direction: column; gap: 10px; }
+.mesai-detay-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; }
+.detay-tarih { font-size: 0.9rem; color: #334155; display: flex; align-items: center; gap: 6px; }
+.bayram-etiket { background: #ffe4e6; color: #9f1239; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+.detay-saatler { display: flex; gap: 8px; font-size: 0.85rem; font-weight: 600; }
+.normal-saat-yazi { color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
+.fazla-saat-yazi { color: #16a34a; background: rgba(34, 197, 94, 0.12); padding: 2px 6px; border-radius: 4px; }
