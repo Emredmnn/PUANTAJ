@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ED YAZILIM | Cloud Puantaj Otomasyonu</title>
     
-    <link rel="stylesheet" href="style.css?v=6.1.0">
+    <link rel="stylesheet" href="style.css?v=6.2.0">
     
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
@@ -65,7 +65,7 @@
                     <span class="pulse-dot" id="sync-status-dot"></span>
                     <p id="sync-status-text">Bulut Sunucusuna Bağlanıyor...</p>
                 </div>
-                <span>v6.1.0 Cloud Mobile</span>
+                <span>v6.2.0 Cloud Mobile</span>
             </div>
         </aside>
 
@@ -110,8 +110,7 @@
 
             <div class="mobile-day-selector-container">
                 <span class="mobile-selector-title"><i class="fa-regular fa-calendar-check"></i> İşlem Yapılacak Gün Seçin:</span>
-                <div class="mobile-day-ribbon" id="mobilGunSeridi">
-                    </div>
+                <div class="mobile-day-ribbon" id="mobilGunSeridi"></div>
             </div>
 
             <div class="puantaj-card desktop-view-only">
@@ -122,14 +121,12 @@
                                 <th class="sticky-col">Personel & Görev Dağılımı</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            </tbody>
+                        <tbody></tbody>
                     </table>
                 </div>
             </div>
 
-            <div class="mobile-view-only" id="mobilKartKapsayici">
-                </div>
+            <div class="mobile-view-only" id="mobilKartKapsayici"></div>
         </main>
     </div>
 
@@ -177,7 +174,7 @@
                     <i class="fa-solid fa-user-pen"></i>
                     <h3>Personel Kartını Düzenle</h3>
                 </div>
-                <span class="close-btn" onclick="editPersonnelModalKapat()" style="color: #94a3b8; opacity: 0.8;">&times;</span>
+                <span class="close-btn" onclick="editPersonnelModalKapat()">&times;</span>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -202,7 +199,7 @@
     </div>
 
     <div id="mesaiDetayModal" class="modal">
-        <div class="modal-content" style="width: 90%; max-width: 440px; border-radius: 24px; margin: 20% auto;">
+        <div class="modal-content" style="width: 90%; max-width: 440px; border-radius: 24px; margin: 15% auto;">
             <div class="modal-header" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; padding: 20px 24px;">
                 <div class="modal-title-group" style="color: white;">
                     <i class="fa-solid fa-clock-history" style="color: #3b82f6;"></i>
@@ -211,14 +208,14 @@
                         <p id="detayModalDonemYazi" style="font-size: 0.75rem; color: #94a3b8; font-weight: 500; margin-top: 2px;">Dönem Detay Listesi</p>
                     </div>
                 </div>
-                <span class="close-btn" onclick="mesaiDetayModalKapat()" style="color: #94a3b8; opacity: 0.8;">&times;</span>
+                <span class="close-btn" onclick="mesaiDetayModalKapat()">&times;</span>
             </div>
-            <div class="modal-body" style="padding: 20px; max-height: 400px; overflow-y: auto;">
+            <div class="modal-body" style="padding: 20px; max-height: 420px; overflow-y: auto;">
                 <div id="mesaiDetayListesi" class="mesai-detay-listesi"></div>
             </div>
         </div>
     </div>
 
-    <script src="script.js?v=6.1.0"></script>
+    <script src="script.js?v=6.2.0"></script>
 </body>
 </html>
