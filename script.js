@@ -82,7 +82,6 @@ function donemDegisti() {
 }
 
 function VerileriGeriYukle() {
-    // Bulut bağlantısı olmasa bile butonların donmaması için yerel hafıza güvencesi
     const localData = localStorage.getItem("ed_local_personeller");
     if(localData) {
         tumKullanicilar = JSON.parse(localData);
@@ -96,6 +95,11 @@ function VerileriGeriYukle() {
             TabloGövdesiniDoldur();
             MobilKartlariniDoldur();
             GelmeyenSayisiniGuncelle();
+        } else {
+            // Bulutta hiç veri kalmadıysa lokal hafızayı da boşalt
+            tumKullanicilar = {};
+            localStorage.setItem("ed_local_personeller", JSON.stringify({}));
+            TabloGövdesiniDoldur(); MobilKartlariniDoldur(); GelmeyenSayisiniGuncelle();
         }
     });
 }
@@ -193,7 +197,7 @@ function TabloGövdesiniDoldur() {
 }
 
 // =========================================================================
-// 4. TELEFON (MOBİL) GÖRÜNÜM MOTORU
+// 4. TELEFON (MOBİL) GÖRÜNÜM MOTORU (BÜTÜN BUTONLAR AKTİFLEŞTİRİLDİ)
 // =========================================================================
 function MobilKartlariniDoldur() {
     const kapsayici = document.getElementById("mobilKartKapsayici");
@@ -208,6 +212,7 @@ function MobilKartlariniDoldur() {
         const pDonemi = p.puantaj && p.puantaj[donemKey] ? p.puantaj[donemKey] : {};
         const gunlukKayit = pDonemi[mobilSeciliGun] || { durum: "BOS", normalMesai: 9, fazlaMesai: 0 };
         const durum = gunlukKayit.durum;
+        const fMesai = ToplamFazlaMesaiHesapla(p, donemKey);
 
         let durumMetni = "Boş Bırakılmış";
         let durumRenkClass = "mob-bos";
@@ -221,6 +226,7 @@ function MobilKartlariniDoldur() {
         else if (durum === "C_IZIN") { durumMetni = "Cenaze İzni"; durumRenkClass = "mob-cizin"; }
         else if (durum === "RAPOR") { durumMetni = "Sağlık Raporu"; durumRenkClass = "mob-rapor"; }
 
+        // Bilgisayardaki buton sisteminin aynısı mobil karta entegre edildi
         kapsayici.innerHTML += `
             <div class="mobile-personnel-card">
                 <div class="mobile-card-main-row">
@@ -232,6 +238,13 @@ function MobilKartlariniDoldur() {
                         <button class="day-btn-mobile ${durumRenkClass}" onclick="durumSecimPenceresi('${perId}', ${mobilSeciliGun})">
                             ${durumMetni}
                         </button>
+                    </div>
+                </div>
+                <div class="mobile-action-bar">
+                    <span class="total-hours-badge" onclick="mesaiDetayModaliAc('${perId}')">${fMesai} Saat</span>
+                    <div class="cell-actions">
+                        <button class="btn-per-edit" onclick="personelDuzenleHazirlik('${perId}')" style="padding:10px; font-size:1.1rem;"><i class="fa-solid fa-pen-to-square"></i> Düzenle</button>
+                        <button class="btn-per-delete" onclick="personelSil('${perId}')" style="padding:10px; font-size:1.1rem; color:#ef4444;"><i class="fa-solid fa-trash-can"></i> Sil</button>
                     </div>
                 </div>
             </div>
@@ -309,30 +322,24 @@ function gelmeyenListesiniGuncelle(yil, ay, gun) {
 
         if (durum !== "GELDI" && durum !== "BOS") {
             sayac++;
-            let badgeStyle = "";
-            if (durum === "GELMEDI") badgeStyle = "background:#fee2e2; color:#ef4444; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700;";
-            else if (durum === "H_IZIN") badgeStyle = "background:#fef08a; color:#a16207; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700;";
-            else if (durum === "Y_IZIN") badgeStyle = "background:#dbeafe; color:#2563eb; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700;";
-            else if (durum === "C_IZIN") badgeStyle = "background:#f1f5f9; color:#0f172a; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700;";
-            else if (durum === "RAPOR") badgeStyle = "background:#f3e8ff; color:#7e22ce; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700;";
-
+            let badgeStyle = "background:#fee2e2; color:#ef4444; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700;";
             const labels = {"GELMEDI":"GELMEDİ", "H_IZIN":"HAFTALIK İZİN", "Y_IZIN":"YILLIK İZİN", "C_IZIN":"CENAZE İZNİ", "RAPOR":"SAĞLIK RAPORU"};
 
             listeAlani.innerHTML += `
                 <div class="mesai-detay-item">
                     <div class="detay-tarih">
                         <strong>${p.adSoyad}</strong>
-                        <span style="font-size:11px; color:#64748b; display:block;">${p.departman}</span>
+                        <span style="font-size:11px; color:#9ca3af; display:block;">${p.departman}</span>
                     </div>
                     <div class="detay-saatler">
-                        <span style="${badgeStyle}">${labels[durum]}</span>
+                        <span style="${badgeStyle}">${labels[durum] || durum}</span>
                     </div>
                 </div>
             `;
         }
     });
 
-    if (sayac === 0) listeAlani.innerHTML = `<p style="text-align:center; color:#64748b; padding:20px 0;">Bu tarihte eksik/izinli personel bulunmuyor şefim!</p>`;
+    if (sayac === 0) listeAlani.innerHTML = `<p style="text-align:center; color:#9ca3af; padding:20px 0;">Bu tarihte eksik/izinli personel bulunmuyor şefim!</p>`;
 }
 
 function GelmeyenSayisiniGuncelle() {
@@ -348,7 +355,7 @@ function GelmeyenSayisiniGuncelle() {
 }
 
 // =========================================================================
-// 6. PERSONEL ARAMA VE DEPARTMAN FİLTRELEME MOTORLARI
+// 6. PERSONEL ARAMA VE FILTRE MOTORLARI
 // =========================================================================
 function aramaYap() {
     const aramaMetni = document.getElementById("panelAramaKutusu").value.toLowerCase().trim();
@@ -383,7 +390,7 @@ function filtreleDepartman(deptName, butonElement) {
 }
 
 // =========================================================================
-// 7. PERSONEL EKLEME / GÜNCELLEME VE SİLME AKSİYONLARI (GARANTİLİ MOTOR)
+// 7. PERSONEL EKLEME / GÜNCELLEME VE MOBİL TEMİZLEME MOTORU
 // =========================================================================
 function personelEkle() {
     const id = document.getElementById("editPersonelId").value;
@@ -393,22 +400,15 @@ function personelEkle() {
     if (!adSoyad) { alert("Lütfen Personel Adı Soyadı alanını doldurunuz."); return; }
 
     if (id) {
-        // Güncelleme İşlemi
-        db.ref("personeller/" + id).update({ adSoyad, departman })
-        .then(() => { TemizleForm(); });
-
-        // Offline Desteği
+        db.ref("personeller/" + id).update({ adSoyad, departman }).then(() => { TemizleForm(); });
         tumKullanicilar[id].adSoyad = adSoyad;
         tumKullanicilar[id].departman = departman;
     } else {
-        // Yeni Kayıt İşlemi
         const yeniRef = db.ref("personeller").push();
         const yeniId = yeniRef.key;
         const yeniVeri = { adSoyad, departman, puantaj: {} };
 
         yeniRef.set(yeniVeri).then(() => { TemizleForm(); });
-
-        // Bağlantı kopuksa arayüzün düşmemesi için anında lokal render tetikleme
         tumKullanicilar[yeniId] = yeniVeri;
     }
 
@@ -432,13 +432,16 @@ function personelDuzenleHazirlik(id) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// MOBİL VE DESKTOP SİLME MOTORU EŞİTLENDİ
 function personelSil(id) {
     if(confirm("Bu personeli ve tüm puantaj geçmişini silmek istediğinize emin misiniz?")) {
-        db.ref("personeller/" + id).remove();
-        delete tumKullanicilar[id];
-        localStorage.setItem("ed_local_personeller", JSON.stringify(tumKullanicilar));
-        TabloGövdesiniDoldur();
-        MobilKartlariniDoldur();
+        db.ref("personeller/" + id).remove().then(() => {
+            delete tumKullanicilar[id];
+            localStorage.setItem("ed_local_personeller", JSON.stringify(tumKullanicilar));
+            TabloGövdesiniDoldur();
+            MobilKartlariniDoldur();
+            GelmeyenSayisiniGuncelle();
+        });
     }
 }
 
@@ -514,17 +517,17 @@ function mesaiDetayModaliAc(perId) {
         satirHtml += `
             <div class="mesai-detay-item">
                 <div class="detay-tarih"><strong>${i.toString().padStart(2,'0')}.${String(aktifAy).padStart(2,'0')}.${aktifYil}</strong></div>
-                <div class="detay-saatler"><span class="normal-saat-yazi">${kayit.normalMesai} Sa</span><span class="fazla-saat-yazi">+${kayit.fazlaMesai} Sa</span></div>
+                <div class="detay-saatler"><span style="color:#4ade80;">${kayit.normalMesai} Sa</span><span style="color:#f97316;">+${kayit.fazlaMesai} Sa</span></div>
             </div>`;
     }
 
     if (!mesaiVarMi) {
-        listeAlani.innerHTML = `<p style="text-align:center; color:#64748b; padding:20px 0;">Bu aya ait çalışma kaydı bulunamadı.</p>`;
+        listeAlani.innerHTML = `<p style="text-align:center; color:#9ca3af; padding:20px 0;">Bu aya ait çalışma kaydı bulunamadı.</p>`;
     } else {
         listeAlani.innerHTML = `
-        <div style="background:#f8fafc; padding:12px; border-radius:12px; margin-bottom:14px; display:flex; justify-content:space-between; border:1px solid #e2e8f0;">
-            <div><span style="font-size:11px; color:#64748b; display:block;">Normal Mesai</span><strong style="color:#1e293b; font-size:15px;">${toplamCalisma} Sa</strong></div>
-            <div><span style="font-size:11px; color:#64748b; display:block;">Toplam FM</span><strong style="color:#16a34a; font-size:15px;">+${toplamFazla} Sa</strong></div>
+        <div style="background:var(--sidebar-input); padding:12px; border-radius:12px; margin-bottom:14px; display:flex; justify-content:space-between; border:1px solid var(--border-color);">
+            <div><span style="font-size:11px; color:var(--text-muted); display:block;">Normal Mesai</span><strong style="color:#ffffff; font-size:15px;">${toplamCalisma} Sa</strong></div>
+            <div><span style="font-size:11px; color:var(--text-muted); display:block;">Toplam FM</span><strong style="color:var(--primary); font-size:15px;">+${toplamFazla} Sa</strong></div>
         </div>` + satirHtml;
     }
     document.getElementById("mesaiDetayModal").style.display = "block";
