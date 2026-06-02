@@ -1,5 +1,5 @@
 // =========================================================================
-// FIREBASE AYARLARI (Bulut Adresin Entegre Edildi)
+// FIREBASE AYARLARI (Bulut Veritabanı Bağlantısı)
 // =========================================================================
 const firebaseConfig = {
     apiKey: "AIzaSyYOUR_ACTUAL_API_KEY",
@@ -11,22 +11,24 @@ const firebaseConfig = {
     appId: "1:123456789:web:abcdef"
 };
 
+// Firebase başlatma kontrolü
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 const db = firebase.database();
 
-// Global Değişkenler
+// Global Durum Değişkenleri
 let aktifYil, aktifAy, toplamGunSayisi;
 let tumKullanicilar = {};
 let secilenDepartman = "HEPSİ";
 let mobilSeciliGun = 1; 
 
+// Uygulama Başlangıç Motoru
 window.onload = function() {
     SaatVeTarihMotoru();
     FirebaseBaglantiDurumuDinle();
     
-    // Varsayılan olarak geçerli yılı ve ayı seçtir
+    // Varsayılan olarak içinde bulunulan ayı ata (Örn: 2026-06)
     const bugun = new Date();
     const buAyStr = bugun.getFullYear() + "-" + String(bugun.getMonth() + 1).padStart(2, '0');
     document.getElementById("donemSecici").value = buAyStr;
@@ -35,6 +37,7 @@ window.onload = function() {
     donemDegisti();
 };
 
+// Multi-Device Canlı Bağlantı Takibi
 function FirebaseBaglantiDurumuDinle() {
     db.ref(".info/connected").on("value", (snap) => {
         const dot = document.getElementById("sync-status-dot");
@@ -47,11 +50,12 @@ function FirebaseBaglantiDurumuDinle() {
         } else {
             dot.style.background = "#ef4444"; 
             dot.style.boxShadow = "0 0 8px #ef4444";
-            txt.innerText = "Bağlantı Aranıyor...";
+            txt.innerText = "Bağlantı Kesildi / Aranıyor...";
         }
     });
 }
 
+// Dönem Değiştiğinde Takvimi Yeniden İnşa Eden Fonksiyon
 function donemDegisti() {
     const donemDegeri = document.getElementById("donemSecici").value;
     if (!donemDegeri) return;
@@ -60,6 +64,7 @@ function donemDegisti() {
     aktifYil = parseInt(parts[0]);
     aktifAy = parseInt(parts[1]);
 
+    // Seçilen ayın kaç gün çektiğini bul (28, 29, 30, 31)
     toplamGunSayisi = new Date(aktifYil, aktifAy, 0).getDate();
     if (mobilSeciliGun > toplamGunSayisi) mobilSeciliGun = toplamGunSayisi;
 
@@ -68,6 +73,7 @@ function donemDegisti() {
     VerileriGeriYukle();
 }
 
+// Masaüstü Hızlı İsim Arama
 function aramaYap() {
     const aramaMetni = document.getElementById("panelAramaKutusu").value.toLowerCase().trim();
     const satirlar = document.querySelectorAll("#tabloGövdeSatirlari tr");
@@ -84,6 +90,7 @@ function aramaYap() {
     });
 }
 
+// Telefon (Mobil) Hızlı İsim Arama
 function aramaYapMobil() {
     const aramaMetni = document.getElementById("mobilAramaKutusu").value.toLowerCase().trim();
     const kartlar = document.querySelectorAll("#mobilKartKapsayici .mobile-personnel-card");
@@ -100,6 +107,7 @@ function aramaYapMobil() {
     });
 }
 
+// Ortak Departman Filtreleme Motoru (Hem Masaüstü Hem Mobil Listeyi Tetikler)
 function filtreleDepartman(deptName, butonElement) {
     secilenDepartman = deptName;
     const butonlar = document.querySelectorAll("#departmanFiltreGrubu .btn-filter");
@@ -111,6 +119,7 @@ function filtreleDepartman(deptName, butonElement) {
     GelmeyenSayisiniGuncelle();
 }
 
+// Masaüstü Gün Sütunlarını Çizen Fonksiyon
 function TabloBasliklariniOlustur() {
     const baslikSatiri = document.getElementById("tabloBaslikSatiri");
     if (!baslikSatiri) return;
@@ -122,7 +131,7 @@ function TabloBasliklariniOlustur() {
         const gunIndeks = tarihObj.getDay();
         const gunAdi = gunAdlari[gunIndeks];
 
-        let挤straSinif = "";
+        let ekstraSinif = "";
         if (gunIndeks === 0 || gunIndeks === 6) {
             ekstraSinif = "weekend";
         }
@@ -131,6 +140,7 @@ function TabloBasliklariniOlustur() {
     baslikSatiri.innerHTML = html;
 }
 
+// Telefon (Mobil) Üst Yatay Gün Şeridini Kuran Fonksiyon
 function MobilGunSeridiOlustur() {
     const serit = document.getElementById("mobilGunSeridi");
     if (!serit) return;
@@ -152,6 +162,7 @@ function MobilGunSeridiOlustur() {
     }
 }
 
+// Mobil Gün Şeridinden Gün Seçildiğinde Tetiklenen Buton Fonksiyonu
 function mobilGunSec(gunNo) {
     mobilSeciliGun = gunNo;
     const kapsuller = document.querySelectorAll("#mobilGunSeridi .mobile-day-capsule");
@@ -163,6 +174,7 @@ function mobilGunSec(gunNo) {
     GelmeyenSayisiniGuncelle();
 }
 
+// Canlı Veritabanı Dinleyicisi (Realtime Database Sync)
 function VerileriGeriYukle() {
     db.ref("personeller").on("value", (snapshot) => {
         tumKullanicilar = snapshot.val() || {};
@@ -172,6 +184,7 @@ function VerileriGeriYukle() {
     });
 }
 
+// Bir Personelin İlgili Döneme Ait Toplam Fazla Mesai Saatini Hesaplar
 function ToplamFazlaMesaiHesapla(personelObj, donemKey) {
     let toplam = 0;
     if (personelObj.puantaj && personelObj.puantaj[donemKey]) {
@@ -185,6 +198,7 @@ function ToplamFazlaMesaiHesapla(personelObj, donemKey) {
     return toplam;
 }
 
+// Masaüstü Tablo Veri Yapısını Basan Fonksiyon
 function TabloGövdesiniDoldur() {
     const govde = document.getElementById("tabloGövdeSatirlari");
     if (!govde) return;
@@ -198,7 +212,7 @@ function TabloGövdesiniDoldur() {
         const fMesai = ToplamFazlaMesaiHesapla(p, donemKey);
         let satirHtml = `<tr>`;
         
-        // DEĞİŞİKLİK: Rozette kafa karıştırmaması için "+4 Sa" yerine sadece "4 Saat" yazması sağlandı
+        // Sabit sütun - Rozet düzenlemesi uygulandı (Örn: "4 Saat")
         satirHtml += `
             <td class="sticky-col">
                 <div class="personnel-cell-wrapper">
@@ -209,8 +223,8 @@ function TabloGövdesiniDoldur() {
                     <div class="badge-and-actions">
                         <span class="total-hours-badge" onclick="mesaiDetayModaliAc('${perId}')">${fMesai} Saat</span>
                         <div class="cell-actions">
-                            <button class="btn-per-edit" onclick="personelDuzenleHazirlik('${perId}')"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button class="btn-per-delete" onclick="personelSil('${perId}')"><i class="fa-solid fa-trash-can"></i></button>
+                            <button class="btn-per-edit" onclick="personelDuzenleHazirlik('${perId}')" title="Düzenle"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button class="btn-per-delete" onclick="personelSil('${perId}')" title="Sil"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </div>
                 </div>
@@ -250,6 +264,7 @@ function TabloGövdesiniDoldur() {
     });
 }
 
+// Telefon (Mobil) Kart Görünümünü ve Buton Fonksiyonlarını Basan Alan
 function MobilKartlariniDoldur() {
     const kapsayici = document.getElementById("mobilKartKapsayici");
     if (!kapsayici) return;
@@ -267,7 +282,10 @@ function MobilKartlariniDoldur() {
 
         let durumMetni = "Boş Bırakılmış";
         let durumRenkClass = "mob-bos";
-        if (durum === "GELDI") { durumMetni = `Geldi (${gunlukKayit.normalMesai}s ${gunlukKayit.fazlaMesai > 0 ? '+'+gunlukKayit.fazlaMesai+'s' : ''})`; durumRenkClass = "mob-geldi"; }
+        if (durum === "GELDI") { 
+            durumMetni = `Geldi (${gunlukKayit.normalMesai}s ${gunlukKayit.fazlaMesai > 0 ? '+'+gunlukKayit.fazlaMesai+'s' : ''})`; 
+            durumRenkClass = "mob-geldi"; 
+        }
         else if (durum === "GELMEDI") { durumMetni = "Gelmedi (YOK)"; durumRenkClass = "mob-gelmedi"; }
         else if (durum === "H_IZIN") { durumMetni = "Haftalık İzin"; durumRenkClass = "mob-hizin"; }
         else if (durum === "Y_IZIN") { durumMetni = "Yıllık İzin"; durumRenkClass = "mob-yizin"; }
@@ -277,11 +295,11 @@ function MobilKartlariniDoldur() {
         kapsayici.innerHTML += `
             <div class="mobile-personnel-card">
                 <div class="mobile-card-main-row">
-                    <div class="mobile-card-info" onclick="mesaiDetayModaliAc('${perId}')">
+                    <div class="mobile-card-info" onclick="mesaiDetayModaliAc('${perId}')" style="cursor:pointer; flex:1;">
                         <strong>${p.adSoyad}</strong>
                         <span>${p.departman}</span>
                     </div>
-                    <div style="display:flex; gap:6px; align-items:center;">
+                    <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
                         <button class="day-btn-mobile ${durumRenkClass}" onclick="durumSecimPenceresi('${perId}', ${mobilSeciliGun})">
                             ${durumMetni}
                         </button>
@@ -292,6 +310,7 @@ function MobilKartlariniDoldur() {
     });
 }
 
+// Personel Ekleme / Güncelleme Buton Aksiyonu
 function personelEkle() {
     const id = document.getElementById("editPersonelId").value;
     const adSoyad = document.getElementById("perAdSoyad").value.trim();
@@ -315,20 +334,26 @@ function personelEkle() {
     }
 }
 
+// Düzenle Butonuna Basıldığında Formu Dolduran Yapı
 function personelDuzenleHazirlik(id) {
     const p = tumKullanicilar[id];
     document.getElementById("editPersonelId").value = id;
     document.getElementById("perAdSoyad").value = p.adSoyad;
     document.getElementById("perGrup").value = p.departman;
     document.getElementById("btnPersonelSubmit").innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Değişiklikleri Güncelle`;
+    
+    // Mobilde ise formu görebilmesi için yukarı kaydır
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// Personel Silme İşlemi
 function personelSil(id) {
     if(confirm("Bu personeli ve tüm puantaj geçmişini silmek istediğinize emin misiniz?")) {
         db.ref("personeller/" + id).remove();
     }
 }
 
+// Günlük Hücre Tıklama Modalı (Masaüstü ve Mobil Ortak Kullanır)
 function durumSecimPenceresi(perId, gunNo) {
     const p = tumKullanicilar[perId];
     document.getElementById("modalPersonelId").value = perId;
@@ -353,6 +378,7 @@ function durumSecimPenceresi(perId, gunNo) {
     document.getElementById("chefModal").style.display = "block";
 }
 
+// Duruma göre saat kutularını açıp kapatan motor
 function modalDurumSenaryoKontrol(durumKodu) {
     if(durumKodu === "GELDI") {
         document.getElementById("normalMesaiAlani").style.display = "block";
@@ -365,6 +391,7 @@ function modalDurumSenaryoKontrol(durumKodu) {
 
 function modalKapat() { document.getElementById("chefModal").style.display = "none"; }
 
+// Modal İçindeki "Değişiklikleri İşle" Buton Aksiyonu
 function gunlukVeriKaydet() {
     const perId = document.getElementById("modalPersonelId").value;
     const gunNo = document.getElementById("modalGunNo").value;
@@ -389,6 +416,7 @@ function gunlukVeriKaydet() {
     });
 }
 
+// Üst Kısımdaki Gelmeyenler Buton Sayacını Günceller
 function GelmeyenSayisiniGuncelle() {
     const donemKey = aktifYil + "_" + String(aktifAy).padStart(2, '0');
     let gelmeyenSayisi = 0;
@@ -405,6 +433,7 @@ function GelmeyenSayisiniGuncelle() {
     document.getElementById("gelmeyenButonMetni").innerText = `Gelmeyenler (${gelmeyenSayisi})`;
 }
 
+// Gelmeyen Personel Listesi Penceresini Açar
 function gelmeyenlerModaliAc() {
     const listeAlani = document.getElementById("gelmeyenlerSirketListesi");
     if(!listeAlani) return;
@@ -447,7 +476,7 @@ function gelmeyenlerModaliAc() {
 
 function gelmeyenlerModalKapat() { document.getElementById("gelmeyenlerModal").style.display = "none"; }
 
-// DEĞİŞİKLİK: RAPOR PENCERESİNDE SADECE MESAİ GİRİLEN (GELDI) GÜNLER FİLTRELENDİ
+// GÜNCELLEME: İSMİN ÜSTÜNE TIKLANDIĞINDA SADECE MESAİ GİRİLENLERİ LİSTELEYEN MESAİ RAPORU MODALI
 function mesaiDetayModaliAc(perId) {
     const p = tumKullanicilar[perId];
     document.getElementById("detayModalPersonelAdi").innerText = p.adSoyad;
@@ -469,7 +498,7 @@ function mesaiDetayModaliAc(perId) {
     for (let i = 1; i <= toplamGunSayisi; i++) {
         const kayit = pDonemi[i] || { durum: "BOS", normalMesai: 0, fazlaMesai: 0 };
         
-        // KRİTİK FİLTRE: Sadece çalışılan (GELDI) günleri ve saat verisi olanları listele
+        // FİLTRELEME: Sadece GELDI olan ve saat verisi barındıran mesailer listelenir.
         if (kayit.durum !== "GELDI" || (parseInt(kayit.normalMesai) === 0 && parseInt(kayit.fazlaMesai) === 0)) {
             continue; 
         }
@@ -499,7 +528,7 @@ function mesaiDetayModaliAc(perId) {
     `;
 
     if (!mesaiVarMi) {
-        listeAlani.innerHTML = `<p style="text-align:center; color:#64748b; padding:20px 0;">Bu aya ait işlenmiş çalışma saati kaydı bulunamadı.</p>`;
+        listeAlani.innerHTML = `<p style="text-align:center; color:#64748b; padding:20px 0;">Bu aya ait işlenmiş aktif çalışma saati kaydı bulunamadı.</p>`;
     } else {
         listeAlani.innerHTML = ozetHtml + satirHtml;
     }
@@ -509,6 +538,7 @@ function mesaiDetayModaliAc(perId) {
 
 function mesaiDetayModalKapat() { document.getElementById("mesaiDetayModal").style.display = "none"; }
 
+// Canlı Premium Saat Sistemi
 function SaatVeTarihMotoru() {
     const aylar = ["OCAK", "ŞUBAT", "MART", "NİSAN", "MAYIS", "HAZİRAN", "TEMMUZ", "AĞUSTOS", "EYLÜL", "EKİM", "KASIM", "ARALIK"];
     const gunler = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
@@ -524,6 +554,7 @@ function SaatVeTarihMotoru() {
     }, 1000);
 }
 
+// Şirket Standartlarında Excel Çıktı Motoru
 function excelAktar() {
     if (Object.keys(tumKullanicilar).length === 0) { alert("Rapora aktarılacak personel verisi bulunamadı!"); return; }
     
