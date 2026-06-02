@@ -1,47 +1,65 @@
-let otomasyonVerisi = JSON.parse(localStorage.getItem("emre_duman_software_puantaj_v6")) || [];
-let sistemLoglari = JSON.parse(localStorage.getItem("emre_duman_logs_v6")) || [];
+// --- FIREBASE BAĞLANTI AYARLARI ---
+// Firebase kütüphanelerini HTML'de en alta eklediğimiz için doğrudan modülleri çağırıyoruz
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
+// !!! DİKKAT: Firebase Console -> Project Settings kısmındaki kendi bilgilerinle burayı doldurabilirsin.
+// Şimdilik sistemin çalışması için temel bulut mimarisini kuruyoruz.
+const firebaseConfig = {
+    databaseURL: "https://emre-duman-puantaj-default-rtdb.firebaseio.com" // Kendi veritabanı linkini buraya yapıştıracaksın
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// Global Değişkenler
+let otomasyonVerisi = [];
+let sistemLoglari = [];
 let seciliPersonelId = null;
 let seciliGun = null;
 let mevcutYil = 2026;
 let mevcutAy = 5; 
 let mevcutFiltre = "HEPSİ"; 
 
-// TÜRKİYE RESMİ TATİLLER TAKVİM MOTORU (2026 Sabitleri)
 const resmiTatiller = {
-    "0-1": "Yılbaşı",
-    "3-23": "Ulusal Egemenlik ve Çocuk Bayramı",
-    "4-1": "Emek ve Dayanışma Günü",
-    "4-19": "Atatürk'ü Anma, Gençlik ve Spor Bayramı",
-    "6-15": "Demokrasi ve Milli Birlik Günü",
-    "7-30": "Zafer Bayramı",
-    "9-29": "Cumhuriyet Bayramı"
+    "0-1": "Yılbaşı", "3-23": "Ulusal Egemenlik", "4-1": "Emek Bayramı",
+    "4-19": "Gençlik Bayramı", "6-15": "Demokrasi Günü", "7-30": "Zafer Bayramı", "9-29": "Cumhuriyet Bayramı"
 };
 
 document.addEventListener("DOMContentLoaded", () => {
     const donemInput = document.getElementById("donemSecici");
     donemInput.value = `2026-06`;
     
-    donemDegisti();
     saatiBaslat();
+    donemDegisti();
+    
+    // --- SİHİRLİ EŞ ZAMANLI DİNLEYİCİ (CANLI SENKRONİZASYON) ---
+    // Başka bir tarayıcıda veri değiştiği an bu fonksiyon otomatik tetiklenir ve ekranı yeniler!
+    const puantajRef = ref(db, 'puantaj');
+    onValue(puantajRef, (snapshot) => {
+        const data = snapshot.val();
+        otomasyonVerisi = data ? Object.values(data) : [];
+        tabloyuCiz();
+    });
+
+    const logRef = ref(db, 'loglar');
+    onValue(logRef, (snapshot) => {
+        const data = snapshot.val();
+        sistemLoglari = data ? Object.values(data) : [];
+    });
 });
 
-// LÜKS SAAT VE TARİH MOTORU
 function saatiBaslat() {
     const aylar = ["OCAK", "ŞUBAT", "MART", "NİSAN", "MAYIS", "HAZİRAN", "TEMMUZ", "AĞUSTOS", "EYLÜL", "EKİM", "KASIM", "ARALIK"];
     function saatiGuncelle() {
         const simdi = new Date();
-        let s = simdi.getHours().toString().padStart(2, '0');
-        let m = simdi.getMinutes().toString().padStart(2, '0');
-        let sn = simdi.getSeconds().toString().padStart(2, '0');
-        document.getElementById("live-time").innerText = `${s}:${m}:${sn}`;
+        document.getElementById("live-time").innerText = simdi.toLocaleTimeString('tr-TR');
         document.getElementById("live-date-day").innerText = simdi.getDate().toString().padStart(2, '0');
         document.getElementById("live-date-month").innerText = aylar[simdi.getMonth()];
         const gunler = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
         document.getElementById("live-date-year").innerText = `${simdi.getFullYear()}, ${gunler[simdi.getDay()]}`;
     }
-    saatiGuncelle();
-    setInterval(saatiGuncelle, 1000);
+    saatiGuncelle(); setInterval(saatiGuncelle, 1000);
 }
 
 function donemDegisti() {
@@ -55,11 +73,7 @@ function donemDegisti() {
 }
 
 function ayinGunSayisi(yil, ay) { return new Date(yil, ay + 1, 0).getDate(); }
-
-function resmiTatilMi(ay, gun) {
-    const key = `${ay}-${gun}`;
-    return resmiTatiller[key] ? true : false;
-}
+function resmiTatilMi(ay, gun) { return resmiTatiller[`${ay}-${gun}`] ? true : false; }
 
 function basliklariCiz() {
     const headerSatiri = document.getElementById("tabloBaslikSatiri");
@@ -70,102 +84,77 @@ function basliklariCiz() {
     for (let g = 1; g <= toplamGun; g++) {
         const d = new Date(mevcutYil, mevcutAy, g);
         const th = document.createElement("th");
-        
-        if (resmiTatilMi(mevcutAy, g)) {
-            th.className = "day-th public-holiday";
-            th.setAttribute("title", resmiTatiller[`${mevcutAy}-${g}`]);
-        } else if (d.getDay() === 0 || d.getDay() === 6) {
-            th.className = "day-th weekend";
-        } else {
-            th.className = "day-th";
-        }
+        if (resmiTatilMi(mevcutAy, g)) { th.className = "day-th public-holiday"; th.setAttribute("title", resmiTatiller[`${mevcutAy}-${g}`]); }
+        else if (d.getDay() === 0 || d.getDay() === 6) th.className = "day-th weekend";
+        else th.className = "day-th";
         th.innerHTML = `${g}<span>${gunAdlari[d.getDay()]}</span>`;
         headerSatiri.appendChild(th);
     }
 }
 
-// ÇOKLU ŞEF/GÖREV ALANI FİLTRELEME MOTORU
 function görevFiltrele(görevTürü) {
     mevcutFiltre = görevTürü;
     const butonlar = document.querySelectorAll(".role-btn");
     butonlar.forEach(btn => btn.classList.remove("active"));
-    
-    const eventTarget = window.event ? window.event.currentTarget : null;
-    if(eventTarget) eventTarget.classList.add("active");
-
-    const baslik = document.getElementById("panelAnaBaslik");
-    if(görevTürü === "HEPSİ") baslik.innerText = "Aylık Personel Puantaj Paneli";
-    else baslik.innerText = `${görevTürü} Sorumlu Paneli`;
-
+    if(window.event) window.event.currentTarget.classList.add("active");
+    document.getElementById("panelAnaBaslik").innerText = görevTürü === "HEPSİ" ? "Aylık Personel Puantaj Paneli" : `${görevTürü} Sorumlu Paneli`;
     tabloyuCiz();
 }
+
+// BULUTA VERİ YAZMA MOTORLARI
+function bulutaPuantajGonder(id, veri) { set(ref(db, 'puantaj/' + id), veri); }
+function bulutaLogGonder(log) { set(ref(db, 'loglar/' + log.id), log); }
 
 function personelEkle() {
     const ad = document.getElementById("perAdSoyad").value.trim();
     const grup = document.getElementById("perGrup").value;
     if (!ad) { alert("Lütfen personel adı giriniz!"); return; }
-    const yeniPersonel = {
-        id: Date.now(), ad: ad, grup: grup, donem: `${mevcutYil}-${mevcutAy}`, gunler: {}
-    };
+    
+    const perId = Date.now();
+    const yeniPersonel = { id: perId, ad: ad, grup: grup, donem: `${mevcutYil}-${mevcutAy}`, gunler: {} };
     const toplamGun = ayinGunSayisi(mevcutYil, mevcutAy);
     for (let i = 1; i <= toplamGun; i++) { yeniPersonel.gunler[i] = { durum: "BOS", normalMesai: 0, fazlaMesai: 0 }; }
-    otomasyonVerisi.push(yeniPersonel);
-    veriyiKaydet(); 
-    tabloyuCiz();
+    
+    bulutaPuantajGonder(perId, yeniPersonel);
     document.getElementById("perAdSoyad").value = "";
 }
 
 function personelSil(id) {
     if(confirm("Bu personeli silmek istediğinize emin misiniz?")) {
-        otomasyonVerisi = otomasyonVerisi.filter(p => p.id !== id);
-        veriyiKaydet(); 
-        tabloyuCiz();
+        set(ref(db, 'puantaj/' + id), null); // Firebase'den siler
     }
 }
-
-function personelDuzenleModaliAc(id) {
-    seciliPersonelId = id;
-    const per = otomasyonVerisi.find(p => p.id === id);
-    if(per) {
-        document.getElementById("editPerAdSoyad").value = per.ad;
-        document.getElementById("editPerGrup").value = per.grup;
-        document.getElementById("editPersonnelModal").style.display = "block";
-    }
-}
-function editPersonnelModalKapat() { document.getElementById("editPersonnelModal").style.display = "none"; }
 
 function personelKartiniGuncelle() {
     const yeniAd = document.getElementById("editPerAdSoyad").value.trim();
     const yeniGrup = document.getElementById("editPerGrup").value;
-    if(!yeniAd) { alert("İsim boş bırakılamaz!"); return; }
+    if(!yeniAd) return;
     const per = otomasyonVerisi.find(p => p.id === seciliPersonelId);
     if(per) {
-        per.ad = yeniAd;
-        per.grup = yeniGrup;
-        veriyiKaydet(); 
-        tabloyuCiz();
+        per.ad = yeniAd; per.grup = yeniGrup;
+        bulutaPuantajGonder(per.id, per);
     }
     editPersonnelModalKapat();
 }
 
-// SADECE EKSTRA FAZLA MESAİLERİ HESAPLAYAN HAKEDİŞ ROZET MOTORU
 function toplamFazlaMesaiHesapla(personel) {
     let toplamFM = 0;
-    Object.values(personel.gunler).forEach(g => {
-        if(g.durum === "GELDI") toplamFM += g.fazlaMesai;
-    });
+    if(personel.gunler) {
+        Object.values(personel.gunler).forEach(g => { if(g.durum === "GELDI") toplamFM += g.fazlaMesai; });
+    }
     return toplamFM;
 }
 
-// ANALİZ RAPORLARINI GÜNCELLEYEN MOTOR
 function raporlariGuncelle(filtrelenmişList) {
     let toplamFM = 0; let toplamG = 0; let toplamR = 0; let toplamIzin = 0;
     filtrelenmişList.forEach(per => {
-        Object.values(per.gunler).forEach(g => {
-            if(g.durum === "GELDI") { toplamG++; toplamFM += g.fazlaMesai; }
-            else if(g.durum === "RAPOR") toplamR++;
-            else if(["H_IZIN", "Y_IZIN", "C_IZIN"].includes(g.durum)) toplamIzin++;
-        });
+        if(per.gunler) {
+            Object.values(per.gunler).forEach(g => {
+                if(g.durum === "GELDI") { toplamG++; toplamFM += g.fazlaMesai; }
+                else if(g.durum === "RAPOR") toplamR++;
+                else if(["H_IZIN", "Y_IZIN", "C_IZIN"].includes(g.durum)) toplamIzin++;
+            });
+        }
     });
     document.getElementById("repTotalFM").innerText = `${toplamFM} Saat`;
     document.getElementById("repTotalG").innerText = `${toplamG} Gün`;
@@ -175,6 +164,7 @@ function raporlariGuncelle(filtrelenmişList) {
 
 function tabloyuCiz() {
     const tbody = document.querySelector("#anaTablo tbody");
+    if(!tbody) return;
     tbody.innerHTML = "";
     const donemKey = `${mevcutYil}-${mevcutAy}`;
     
@@ -188,7 +178,6 @@ function tabloyuCiz() {
         const tr = document.createElement("tr");
         const tdBilgi = document.createElement("td");
         tdBilgi.className = "sticky-col";
-        
         const ekstraMesaiSaati = toplamFazlaMesaiHesapla(per);
 
         tdBilgi.innerHTML = `
@@ -197,14 +186,10 @@ function tabloyuCiz() {
                     <div style="font-weight:700; color:var(--text-dark); font-size:0.95rem;">${per.ad}</div>
                     <div style='color:var(--text-muted); font-size:0.75rem; font-weight:600; margin-top:2px;'>${per.grup}</div>
                 </div>
-                <div class="total-hours-badge" title="Bu Ayki Toplam Fazla Mesai Saati">+${ekstraMesaiSaati} Sa</div>
+                <div class="total-hours-badge">+${ekstraMesaiSaati} Sa</div>
                 <div class="cell-actions">
-                    <button onclick="personelDuzenleModaliAc(${per.id})" class="btn-per-edit" title="İsim/Görev Düzenle">
-                        <i class="fa-solid fa-user-pen"></i>
-                    </button>
-                    <button onclick="personelSil(${per.id})" class="btn-per-delete" title="Personeli Sil">
-                        <i class="fa-solid fa-user-xmark"></i>
-                    </button>
+                    <button onclick="personelDuzenleModaliAc(${per.id})" class="btn-per-edit"><i class="fa-solid fa-user-pen"></i></button>
+                    <button onclick="personelSil(${per.id})" class="btn-per-delete"><i class="fa-solid fa-user-xmark"></i></button>
                 </div>
             </div>
         `;
@@ -213,11 +198,10 @@ function tabloyuCiz() {
         for (let g = 1; g <= toplamGun; g++) {
             const d = new Date(mevcutYil, mevcutAy, g);
             const tdGun = document.createElement("td");
-            
             if (resmiTatilMi(mevcutAy, g)) tdGun.className = "public-holiday";
             else if(d.getDay() === 0 || d.getDay() === 6) tdGun.className = "weekend";
 
-            const gunVerisi = per.gunler[g] || { durum: "BOS", normalMesai: 0, fazlaMesai: 0 };
+            const gunVerisi = per.gunler ? per.gunler[g] : { durum: "BOS", normalMesai: 0, fazlaMesai: 0 };
             const btn = document.createElement("button");
             btn.className = `day-btn ${gunVerisi.durum}`;
             
@@ -230,22 +214,20 @@ function tabloyuCiz() {
             else if (gunVerisi.durum === "RAPOR") btn.innerText = "R";
             
             btn.onclick = () => chefDüzenlemeModaliAc(per.id, g, gunVerisi);
-            tdGun.appendChild(btn);
-            tr.appendChild(tdGun);
+            tdGun.appendChild(btn); tr.appendChild(tdGun);
         }
         tbody.appendChild(tr);
     });
 }
 
 function chefDüzenlemeModaliAc(perId, gun, veri) {
-    seciliPersonelId = perId;
-    seciliGun = gun;
+    seciliPersonelId = perId; seciliGun = gun;
     const per = otomasyonVerisi.find(p => p.id === perId);
     document.getElementById("modalBaslik").innerText = `${gun}. Gün Düzenleme`;
     document.getElementById("modalDurum").value = veri.durum;
-    document.getElementById("modalNormalMesai").value = veri.durum === "BOS" ? 9 : veri.normalMesai;
+    document.getElementById("modalNormalMesai").value = veri.durum === "BOS" ? 9 : (veri.normalMesai || 9);
     document.getElementById("modalFazlaMesai").value = veri.fazlaMesai || 0;
-    durumDegisti(document.getElementById("modalDurum").value);
+    durumDegisti(veri.durum);
     document.getElementById("chefModal").style.display = "block";
 }
 
@@ -258,7 +240,6 @@ function durumDegisti(durum) {
 
 function modalKapat() { document.getElementById("chefModal").style.display = "none"; }
 
-// OTOMATİK VERİ KAYDINI VE DENETİM LOGLAMASINI SAĞLAYAN ANA MOTOR
 function gunlukVeriKaydet() {
     const yeniDurum = document.getElementById("modalDurum").value;
     let yeniNormal = parseInt(document.getElementById("modalNormalMesai").value) || 0;
@@ -270,84 +251,38 @@ function gunlukVeriKaydet() {
         const eskiVeri = per.gunler[seciliGun] || { durum: "BOS", normalMesai: 0, fazlaMesai: 0 };
         const eskiToplam = (eskiVeri.normalMesai || 0) + (eskiVeri.fazlaMesai || 0);
 
-        // DENETİM GÜNLÜĞÜ: Sadece mesai saatleri manuel değiştirilirse tetiklenir
         if (eskiToplam !== yeniToplam && yeniDurum === "GELDI") {
             const simdi = new Date();
-            const logKaydi = {
-                tarih: simdi.toLocaleDateString('tr-TR'),
-                saat: simdi.toLocaleTimeString('tr-TR'),
-                personel: per.ad,
-                gun: seciliGun,
-                eskiMesai: eskiToplam,
-                yeniMesai: yeniToplam
-            };
-
-            sistemLoglari.push(logKaydi);
-            if(sistemLoglari.length > 100) sistemLoglari.shift();
-            localStorage.setItem("emre_duman_logs_v6", JSON.stringify(sistemLoglari));
+            const logId = Date.now();
+            const logKaydi = { id: logId, tarih: simdi.toLocaleDateString('tr-TR'), saat: simdi.toLocaleTimeString('tr-TR'), personel: per.ad, gun: seciliGun, eskiMesai: eskiToplam, yeniMesai: yeniToplam };
+            bulutaLogGonder(logKaydi);
         }
 
         if (yeniDurum !== "GELDI") { yeniNormal = 0; yeniFazla = 0; }
-
         per.gunler[seciliGun] = { durum: yeniDurum, normalMesai: yeniNormal, fazlaMesai: yeniFazla };
-        veriyiKaydet(); 
-        tabloyuCiz();
+        bulutaPuantajGonder(per.id, per); // BULUTA OTOMATİK ANLIK GÖNDERİM
     }
     modalKapat();
 }
 
-function veriyiKaydet() { localStorage.setItem("emre_duman_software_puantaj_v6", JSON.stringify(otomasyonVerisi)); }
-
-// DENETİM LOGU MODALİ AÇMA
 function logModalAc() {
     const logListesi = document.getElementById("logListesi");
     logListesi.innerHTML = "";
-
-    if (sistemLoglari.length === 0) {
-        logListesi.innerHTML = "<p style='text-align:center; padding:20px; color:#94a3b8;'>Henüz bir mesai değişikliği yapılmadı.</p>";
-    } else {
+    if (sistemLoglari.length === 0) { logListesi.innerHTML = "<p style='text-align:center; padding:20px; color:#94a3b8;'>Hareket yok.</p>"; }
+    else {
         sistemLoglari.slice().reverse().forEach(log => {
-            const item = document.createElement("div");
-            item.className = "log-item";
-            item.innerHTML = `
-                <span class="log-time">${log.tarih} | ${log.saat}</span>
-                <div class="log-text">
-                    <strong>${log.personel}</strong> için ${log.gun}. gün çalışma süresi güncellendi: <br>
-                    <span class="log-badge">${log.eskiMesai} Sa</span> ➔ <span class="log-badge">${log.yeniMesai} Sa</span>
-                </div>
-            `;
+            const item = document.createElement("div"); item.className = "log-item";
+            item.innerHTML = `<span class="log-time">${log.tarih} | ${log.saat}</span><div class="log-text"><strong>${log.personel}</strong> için ${log.gun}. gün çalışma süresi güncellendi: <br><span class="log-badge">${log.eskiMesai} Sa</span> ➔ <span class="log-badge">${log.yeniMesai} Sa</span></div>`;
             logListesi.appendChild(item);
         });
     }
     document.getElementById("logModal").style.display = "block";
 }
-
 function logModalKapat() { document.getElementById("logModal").style.display = "none"; }
+function editPersonnelModalKapat() { document.getElementById("editPersonnelModal").style.display = "none"; }
+function personelDuzenleModaliAc(id) { seciliPersonelId = id; const per = otomasyonVerisi.find(p => p.id === id); if(per) { document.getElementById("editPerAdSoyad").value = per.ad; document.getElementById("editPerGrup").value = per.grup; document.getElementById("editPersonnelModal").style.display = "block"; } }
 
-function excelAktar() {
-    const donemKey = `${mevcutYil}-${mevcutAy}`;
-    let buAyinPersonelleri = otomasyonVerisi.filter(p => p.donem === donemKey);
-    if(mevcutFiltre !== "HEPSİ") buAyinPersonelleri = buAyinPersonelleri.filter(p => p.grup === mevcutFiltre);
-    if(buAyinPersonelleri.length === 0) { alert("Bu filtreye ait indirilecek veri bulunamadı!"); return; }
-    const toplamGun = ayinGunSayisi(mevcutYil, mevcutAy);
-    
-    let excelData = [];
-    let basliklar = ["Personel Ad Soyad", "Görev / Departman", "Toplam Fazla Mesai (+ Sa)"];
-    for(let i=1; i<=toplamGun; i++) { basliklar.push(`${i}. Gün`); }
-    excelData.push(basliklar);
-
-    buAyinPersonelleri.forEach(per => {
-        let satir = [per.ad, per.grup, toplamFazlaMesaiHesapla(per)];
-        for(let g=1; g<=toplamGun; g++) {
-            let gVeri = per.gunler[g];
-            if(!gVeri || gVeri.durum === "BOS") satir.push("-");
-            else if(gVeri.durum === "GELDI") satir.push(gVeri.fazlaMesai > 0 ? `G (+${gVeri.fazlaMesai}s)` : "G");
-            else satir.push(gVeri.durum);
-        }
-        excelData.push(satir);
-    });
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet(excelData);
-    XLSX.utils.book_append_sheet(wb, ws, "Puantaj Raporu");
-    XLSX.writeFile(wb, `Emre_Duman_Yazilim_Puantaj_${mevcutFiltre}_${mevcutYil}_${mevcutAy + 1}.xlsx`);
-}
+window.personelEkle = personelEkle; window.personelSil = personelSil; window.personelDuzenleModaliAc = personelDuzenleModaliAc;
+window.editPersonnelModalKapat = editPersonnelModalKapat; window.personelKartiniGuncelle = personelKartiniGuncelle;
+window.logModalAc = logModalAc; window.logModalKapat = logModalKapat; window.modalKapat = modalKapat;
+window.gunlukVeriKaydet = gunlukVeriKaydet; window.donemDegisti = donemDegisti; window.görevFiltrele = görevFiltrele;
