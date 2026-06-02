@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (event.target == document.getElementById("chefModal")) modalKapat();
         if (event.target == document.getElementById("editPersonnelModal")) editPersonnelModalKapat();
         if (event.target == document.getElementById("mesaiDetayModal")) mesaiDetayModalKapat();
+        if (event.target == document.getElementById("gelmeyenlerModal")) gelmeyenlerModalKapat();
     }
 });
 
@@ -103,6 +104,11 @@ function filtreleDepartman(grupAdi, element) {
     aktifFiltreDepartman = grupAdi;
     document.querySelectorAll('.btn-filter').forEach(btn => btn.classList.remove('active'));
     if(element) element.classList.add('active');
+    
+    // Filtre değişince arama kutularını temizleyelim karışıklık olmasın
+    if(document.getElementById("panelAramaKutusu")) document.getElementById("panelAramaKutusu").value = "";
+    if(document.getElementById("mobilAramaKutusu")) document.getElementById("mobilAramaKutusu").value = "";
+    
     tabloyuCiz();
 }
 
@@ -194,7 +200,6 @@ function toplamFazlaMesaiHesapla(personel) {
     return toplamFM;
 }
 
-// KRİTİK GÜNCELLEME: DETAYLI MESAİ RAPORUNDA BOŞ GÜNLERİ GÖSTERMEZ
 function mesaiDetayModaliAc(personelId) {
     const per = otomasyonVerisi.find(p => p.id === personelId);
     if (!per) return;
@@ -204,31 +209,18 @@ function mesaiDetayModaliAc(personelId) {
     const listeKapsayici = document.getElementById("mesaiDetayListesi");
     listeKapsayici.innerHTML = "";
     
-    let kayitliGunVarMi = false;
+    let mesaiVarMi = false;
     const toplamGun = ayinGunSayisi(mevcutYil, mevcutAy);
 
     for (let g = 1; g <= toplamGun; g++) {
         if(per.gunler && per.gunler[g]) {
             const gunVeri = per.gunler[g];
-            
-            // Eğer durum 'BOS' ise bu günü rapora dahil etme (Atla)
-            if (gunVeri.durum === "BOS") continue;
-
-            kayitliGunVarMi = true;
+            if (gunVeri.durum !== "GELDI" || (parseInt(gunVeri.normalMesai) === 0 && parseInt(gunVeri.fazlaMesai) === 0)) {
+                continue; 
+            }
+            mesaiVarMi = true;
             let bayramNotu = resmiTatilMi(mevcutAy, g) ? `<span class="bayram-etiket">Bayram</span>` : "";
             
-            let durumYazi = "";
-            let saatDetay = "";
-            
-            if (gunVeri.durum === "GELDI") {
-                durumYazi = `<span class="status-badge G_GELDI">Geldi</span>`;
-                saatDetay = `<span class="normal-saat-yazi">${gunVeri.normalMesai} Sa</span> <span class="fazla-saat-yazi">+${gunVeri.fazlaMesai} Sa</span>`;
-            } else if (gunVeri.durum === "GELMEDI") durumYazi = `<span class="status-badge G_GELMEDI">YOK</span>`;
-            else if (gunVeri.durum === "H_IZIN") durumYazi = `<span class="status-badge G_H_IZIN">H. İzin</span>`;
-            else if (gunVeri.durum === "Y_IZIN") durumYazi = `<span class="status-badge G_Y_IZIN">Y. İzin</span>`;
-            else if (gunVeri.durum === "C_IZIN") durumYazi = `<span class="status-badge G_C_IZIN">C. İzin</span>`;
-            else if (gunVeri.durum === "RAPOR") durumYazi = `<span class="status-badge G_RAPOR">Raporlu</span>`;
-
             const gunSatiri = document.createElement("div");
             gunSatiri.className = "mesai-detay-item";
             gunSatiri.innerHTML = `
@@ -237,21 +229,131 @@ function mesaiDetayModaliAc(personelId) {
                     ${bayramNotu}
                 </div>
                 <div class="detay-saatler">
-                    ${durumYazi}
-                    ${saatDetay}
+                    <span class="status-badge G_GELDI">Çalıştı</span>
+                    <span class="normal-saat-yazi">${gunVeri.normalMesai} Sa</span> 
+                    <span class="fazla-saat-yazi">+${gunVeri.fazlaMesai} Sa</span>
                 </div>
             `;
             listeKapsayici.appendChild(gunSatiri);
         }
     }
-    
-    if (!kayitliGunVarMi) { 
-        listeKapsayici.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:0.9rem;">Bu aya ait işlenmiş puantaj kaydı bulunamadı.</div>`; 
+    if (!mesaiVarMi) { 
+        listeKapsayici.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:0.9rem;">Bu ay içerisinde girilmiş herhangi bir çalışma saati bulunamadı.</div>`; 
     }
     document.getElementById("mesaiDetayModal").style.display = "block";
 }
 
 function mesaiDetayModalKapat() { document.getElementById("mesaiDetayModal").style.display = "none"; }
+
+// ==========================================
+// YENİ EK: MASAÜSTÜ VE MOBİL ARAMA MOTORLARI
+// ==========================================
+function aramaYap() {
+    const aramaMetni = document.getElementById("panelAramaKutusu").value.toLowerCase().trim();
+    const rows = document.querySelectorAll("#anaTablo tbody tr");
+    
+    rows.forEach(row => {
+        // Personel adı hücresini bul
+        const adHucresi = row.querySelector(".sticky-col div div div:first-child");
+        if(!adHucresi) return;
+        
+        const adText = adHucresi.innerText.toLowerCase();
+        if (adText.includes(aramaMetni)) {
+            row.style.display = ""; // Göster
+        } else {
+            row.style.display = "none"; // Gizle
+        }
+    });
+}
+
+function aramaYapMobil() {
+    const aramaMetni = document.getElementById("mobilAramaKutusu").value.toLowerCase().trim();
+    const kartlar = document.querySelectorAll("#mobilKartKapsayici .mobile-personnel-card");
+    
+    kartlar.forEach(kart => {
+        const adAlani = kart.querySelector(".m-per-name");
+        if(!adAlani) return;
+        
+        const adText = adAlani.innerText.toLowerCase();
+        if (adText.includes(aramaMetni)) {
+            kart.style.display = "flex";
+        } else {
+            kart.style.display = "none";
+        }
+    });
+}
+
+// ==========================================
+// YENİ EK: GÜNLÜK GELMEYEN PERSONEL TAKİBİ
+// ==========================================
+function gelmeyenPersonelSayisiniGuncelle() {
+    const donemKey = `${mevcutYil}-${mevcutAy}`;
+    let buAyinPersonelleri = otomasyonVerisi.filter(p => p && p.donem === donemKey);
+    
+    let sayac = 0;
+    buAyinPersonelleri.forEach(per => {
+        if(per.gunler && per.gunler[seciliGun]) {
+            if(per.gunler[seciliGun].durum === "GELMEDI") sayac++;
+        }
+    });
+    
+    const btnMetin = document.getElementById("gelmeyenButonMetni");
+    if(btnMetin) {
+        btnMetin.innerText = `Gelmeyenler (${sayac})`;
+    }
+}
+
+function gelmeyenlerModaliAc() {
+    const aylar = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+    const tamTarih = `${seciliGun.toString().padStart(2,'0')} ${aylar[mevcutAy]} ${mevcutYil}`;
+    
+    document.getElementById("gelmeyenlerModalTarih").innerText = `${tamTarih} Günü Listesi`;
+    const listeKapsayici = document.getElementById("gelmeyenlerSirketListesi");
+    listeKapsayici.innerHTML = "";
+    
+    const donemKey = `${mevcutYil}-${mevcutAy}`;
+    let buAyinPersonelleri = otomasyonVerisi.filter(p => p && p.donem === donemKey);
+    if(aktifFiltreDepartman !== "HEPSİ") buAyinPersonelleri = buAyinPersonelleri.filter(p => p.grup === aktifFiltreDepartman);
+    
+    let gelmeyenVarMi = false;
+    
+    buAyinPersonelleri.forEach(per => {
+        if(per.gunler && per.gunler[seciliGun] && per.gunler[seciliGun].durum === "GELMEDI") {
+            gelmeyenVarMi = true;
+            
+            const kart = document.createElement("div");
+            kart.className = "mesai-detay-item";
+            kart.style.borderLeft = "4px solid #ef4444";
+            kart.innerHTML = `
+                <div class="detay-tarih">
+                    <i class="fa-solid fa-user-xmark" style="color:#ef4444;"></i>
+                    <div>
+                        <strong style="font-size:0.95rem; color:#0f172a;">${per.ad}</strong>
+                        <div style="font-size:0.75rem; color:#64748b; font-weight:600; margin-top:1px;">${per.grup}</div>
+                    </div>
+                </div>
+                <div class="detay-saatler">
+                    <span class="status-badge G_GELMEDI">GELMEDİ (YOK)</span>
+                </div>
+            `;
+            listeKapsayici.appendChild(kart);
+        }
+    });
+    
+    if(!gelmeyenVarMi) {
+        listeKapsayici.innerHTML = `
+            <div style="text-align:center; padding:24px; color:#64748b; font-size:0.9rem;">
+                <i class="fa-solid fa-circle-check" style="color:#10b981; font-size:1.8rem; display:block; margin-bottom:8px;"></i>
+                Seçili tarihte işe gelmeyen personel bulunmamaktadır. Herkes görevinin başında!
+            </div>
+        `;
+    }
+    
+    document.getElementById("gelmeyenlerModal").style.display = "block";
+}
+
+function gelmeyenlerModalKapat() { document.getElementById("gelmeyenlerModal").style.display = "none"; }
+
 
 function tabloyuCiz() {
     const tbody = document.querySelector("#anaTablo tbody");
@@ -263,7 +365,7 @@ function tabloyuCiz() {
     if(tbody) {
         tbody.innerHTML = "";
         if (filtrelenmisList.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="${toplamGun + 1}" style="padding: 30px; color: var(--text-muted); font-weight: 500;">Kayıtlı personel bulunamadı.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="${tophamGun + 1}" style="padding: 30px; color: var(--text-muted); font-weight: 500;">Kayıtlı personel bulunamadı.</td></tr>`;
         } else {
             filtrelenmisList.forEach(per => {
                 const tr = document.createElement("tr");
@@ -312,6 +414,13 @@ function tabloyuCiz() {
             });
         }
     }
+    
+    // Arama yapılmışsa filtrelemeyi koru
+    if(document.getElementById("panelAramaKutusu") && document.getElementById("panelAramaKutusu").value !== "") {
+        aramaYap();
+    }
+    
+    gelmeyenPersonelSayisiniGuncelle();
     mobilKartlariCiz();
 }
 
@@ -356,7 +465,6 @@ function gunlukVeriKaydet() {
     modalKapat();
 }
 
-// KRİTİK GÜNCELLEME: EXCEL ÇIKTISINDA DA BOŞ BARKILAN GÜNLERİ DEĞERLENDİRİR
 function excelAktar() {
     const donemKey = `${mevcutYil}-${mevcutAy}`;
     let buAyinPersonelleri = otomasyonVerisi.filter(p => p && p.donem === donemKey);
@@ -373,7 +481,7 @@ function excelAktar() {
         let satir = [per.ad, per.grup, toplamFazlaMesaiHesapla(per)];
         for(let g=1; g<=toplamGun; g++) {
             let gVeri = per.gunler ? per.gunler[g] : null;
-            if(!gVeri || gVeri.durum === "BOS") satir.push("-"); // Excel'de de veri girilmeyenler sadeleşti
+            if(!gVeri || gVeri.durum === "BOS") satir.push("-");
             else if(gVeri.durum === "GELDI") satir.push(gVeri.fazlaMesai > 0 ? `G (+${gVeri.fazlaMesai}s)` : "G");
             else satir.push(gVeri.durum);
         }
@@ -409,6 +517,7 @@ function mobilGunSeridiniCiz() {
             seciliGun = g;
             document.querySelectorAll(".btn-mobile-day").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
+            gelmeyenPersonelSayisiniGuncelle();
             mobilKartlariCiz();
         };
         serit.appendChild(btn);
@@ -463,4 +572,9 @@ function mobilKartlariCiz() {
         `;
         konteyner.appendChild(kart);
     });
+
+    // Mobil arama yapılmışsa filtrele
+    if(document.getElementById("mobilAramaKutusu") && document.getElementById("mobilAramaKutusu").value !== "") {
+        aramaYapMobil();
+    }
 }
