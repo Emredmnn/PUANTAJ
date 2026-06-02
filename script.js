@@ -1,5 +1,21 @@
 // =========================================================================
-// FIREBASE AYARLARI (Bulut Veritabanı Bağlantısı)
+// 1. GÜVENLİK DUVARI (Oturum Açılmamışsa Giriş Sayfasına Geri Gönderir)
+// =========================================================================
+if (sessionStorage.getItem("ed_oturum_aktif") !== "true") {
+    alert("Yetkisiz Erişim! Lütfen önce giriş yapın şefim.");
+    window.location.href = "login.html";
+}
+
+// Güvenli Çıkış Motoru
+function sistemdenCikisYap() {
+    if(confirm("Sistemden çıkış yapmak istediğinize emin misiniz?")) {
+        sessionStorage.removeItem("ed_oturum_aktif");
+        window.location.href = "login.html";
+    }
+}
+
+// =========================================================================
+// 2. FIREBASE REALTIME DATABASE BAĞLANTI AYARLARI
 // =========================================================================
 const firebaseConfig = {
     apiKey: "AIzaSyYOUR_ACTUAL_API_KEY",
@@ -16,7 +32,7 @@ if (!firebase.apps.length) {
 }
 const db = firebase.database();
 
-// Global Durum Değişkenleri
+// Global Sistem Değişkenleri
 let aktifYil, aktifAy, toplamGunSayisi;
 let tumKullanicilar = {};
 let secilenDepartman = "HEPSİ";
@@ -35,6 +51,7 @@ window.onload = function() {
     donemDegisti();
 };
 
+// Canlı Eşitleme Durumu Dinleyicisi
 function FirebaseBaglantiDurumuDinle() {
     db.ref(".info/connected").on("value", (snap) => {
         const dot = document.getElementById("sync-status-dot");
@@ -52,6 +69,7 @@ function FirebaseBaglantiDurumuDinle() {
     });
 }
 
+// Dönem Değiştiğinde Takvimi Yeniden Kurup Verileri Çeken Fonksiyon
 function donemDegisti() {
     const donemDegeri = document.getElementById("donemSecici").value;
     if (!donemDegeri) return;
@@ -78,72 +96,7 @@ function VerileriGeriYukle() {
 }
 
 // =========================================================================
-// GELMEYENLER & GERİYE DÖNÜK AKILLI TAKVİM MOTORU
-// =========================================================================
-function gelmeyenlerModaliAc() {
-    const sorguInput = document.getElementById("gelmeyenSorguTarihi");
-    sorguInput.value = `${aktifYil}-${String(aktifAy).padStart(2, '0')}-${String(mobilSeciliGun).padStart(2, '0')}`;
-    gelmeyenListesiniGuncelle(aktifYil, aktifAy, mobilSeciliGun);
-    document.getElementById("gelmeyenlerModal").style.display = "block";
-}
-
-function gelmeyenTarihDegisti(tarihStr) {
-    if(!tarihStr) return;
-    const parts = tarihStr.split("-");
-    gelmeyenListesiniGuncelle(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]));
-}
-
-function gelmeyenListesiniGuncelle(yil, ay, gun) {
-    const listeAlani = document.getElementById("gelmeyenlerSirketListesi");
-    if(!listeAlani) return;
-    listeAlani.innerHTML = "";
-
-    const ayAdlari = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-    const gunAdlari = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
-    
-    const tarihObj = new Date(yil, ay - 1, gun);
-    document.getElementById("gelmeyenlerModalTarih").innerText = `${gun} ${ayAdlari[ay - 1]} ${yil}, ${gunAdlari[tarihObj.getDay()]}`;
-
-    const donemKey = yil + "_" + String(ay).padStart(2, '0');
-    let sayac = 0;
-
-    Object.keys(tumKullanicilar).forEach(perId => {
-        const p = tumKullanicilar[perId];
-        if (secilenDepartman !== "HEPSİ" && p.departman !== secilenDepartman) return;
-
-        const pDonemi = p.puantaj && p.puantaj[donemKey] ? p.puantaj[donemKey] : {};
-        const durum = pDonemi[gun] ? pDonemi[gun].durum : "BOS";
-
-        if (durum !== "GELDI" && durum !== "BOS") {
-            sayac++;
-            let badgeStyle = "";
-            if (durum === "GELMEDI") badgeStyle = "background:#fee2e2; color:#ef4444; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700;";
-            else if (durum === "H_IZIN") badgeStyle = "background:#fef08a; color:#a16207; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700;";
-            else if (durum === "Y_IZIN") badgeStyle = "background:#dbeafe; color:#2563eb; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700;";
-            else if (durum === "C_IZIN") badgeStyle = "background:#f1f5f9; color:#0f172a; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700;";
-            else if (durum === "RAPOR") badgeStyle = "background:#f3e8ff; color:#7e22ce; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700;";
-
-            const labels = {"GELMEDI":"GELMEDİ", "H_IZIN":"HAFTALIK İZİN", "Y_IZIN":"YILLIK İZİN", "C_IZIN":"CENAZE İZNİ", "RAPOR":"SAĞLIK RAPORU"};
-
-            listeAlani.innerHTML += `
-                <div class="mesai-detay-item">
-                    <div class="detay-tarih">
-                        <strong>${p.adSoyad}</strong>
-                        <span style="font-size:11px; color:#64748b; display:block;">${p.departman}</span>
-                    </div>
-                    <div class="detay-saatler">
-                        <span style="${badgeStyle}">${labels[durum]}</span>
-                    </div>
-                </div>
-            `;
-        }
-    });
-
-    if (sayac === 0) listeAlani.innerHTML = `<p style="text-align:center; color:#64748b; padding:20px 0;">Bu tarihte eksik/izinli personel bulunmuyor şefim!</p>`;
-}
-
-// =========================================================================
-// STANDART PANEL VE YÖNETİM MOTORLARI
+// 3. MASAÜSTÜ TABLO GÖRÜNÜM MOTORU
 // =========================================================================
 function ToplamFazlaMesaiHesapla(personelObj, donemKey) {
     let toplam = 0;
@@ -234,6 +187,9 @@ function TabloGövdesiniDoldur() {
     });
 }
 
+// =========================================================================
+// 4. TELEFON (MOBİL) GÖRÜNÜM MOTORU
+// =========================================================================
 function MobilKartlariniDoldur() {
     const kapsayici = document.getElementById("mobilKartKapsayici");
     if (!kapsayici) return;
@@ -309,6 +265,86 @@ function mobilGunSec(gunNo) {
     GelmeyenSayisiniGuncelle();
 }
 
+// =========================================================================
+// 5. GELMEYENLER MODALI & GERİYE DÖNÜK AKILLI TAKVİM MOTORU
+// =========================================================================
+function gelmeyenlerModaliAc() {
+    const sorguInput = document.getElementById("gelmeyenSorguTarihi");
+    sorguInput.value = `${aktifYil}-${String(aktifAy).padStart(2, '0')}-${String(mobilSeciliGun).padStart(2, '0')}`;
+    gelmeyenListesiniGuncelle(aktifYil, aktifAy, mobilSeciliGun);
+    document.getElementById("gelmeyenlerModal").style.display = "block";
+}
+
+function gelmeyenTarihDegisti(tarihStr) {
+    if(!tarihStr) return;
+    const parts = tarihStr.split("-");
+    gelmeyenListesiniGuncelle(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]));
+}
+
+function gelmeyenListesiniGuncelle(yil, ay, gun) {
+    const listeAlani = document.getElementById("gelmeyenlerSirketListesi");
+    if(!listeAlani) return;
+    listeAlani.innerHTML = "";
+
+    const ayAdlari = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+    const gunAdlari = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
+    
+    const tarihObj = new Date(yil, ay - 1, gun);
+    document.getElementById("gelmeyenlerModalTarih").innerText = `${gun} ${ayAdlari[ay - 1]} ${yil}, ${gunAdlari[tarihObj.getDay()]}`;
+
+    const donemKey = yil + "_" + String(ay).padStart(2, '0');
+    let sayac = 0;
+
+    Object.keys(tumKullanicilar).forEach(perId => {
+        const p = tumKullanicilar[perId];
+        if (secilenDepartman !== "HEPSİ" && p.departman !== secilenDepartman) return;
+
+        const pDonemi = p.puantaj && p.puantaj[donemKey] ? p.puantaj[donemKey] : {};
+        const durum = pDonemi[gun] ? pDonemi[gun].durum : "BOS";
+
+        if (durum !== "GELDI" && durum !== "BOS") {
+            sayac++;
+            let badgeStyle = "";
+            if (durum === "GELMEDI") badgeStyle = "background:#fee2e2; color:#ef4444; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700;";
+            else if (durum === "H_IZIN") badgeStyle = "background:#fef08a; color:#a16207; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700;";
+            else if (durum === "Y_IZIN") badgeStyle = "background:#dbeafe; color:#2563eb; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700;";
+            else if (durum === "C_IZIN") badgeStyle = "background:#f1f5f9; color:#0f172a; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700;";
+            else if (durum === "RAPOR") badgeStyle = "background:#f3e8ff; color:#7e22ce; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700;";
+
+            const labels = {"GELMEDI":"GELMEDİ", "H_IZIN":"HAFTALIK İZİN", "Y_IZIN":"YILLIK İZİN", "C_IZIN":"CENAZE İZNİ", "RAPOR":"SAĞLIK RAPORU"};
+
+            listeAlani.innerHTML += `
+                <div class="mesai-detay-item">
+                    <div class="detay-tarih">
+                        <strong>${p.adSoyad}</strong>
+                        <span style="font-size:11px; color:#64748b; display:block;">${p.departman}</span>
+                    </div>
+                    <div class="detay-saatler">
+                        <span style="${badgeStyle}">${labels[durum]}</span>
+                    </div>
+                </div>
+            `;
+        }
+    });
+
+    if (sayac === 0) listeAlani.innerHTML = `<p style="text-align:center; color:#64748b; padding:20px 0;">Bu tarihte eksik/izinli personel bulunmuyor şefim!</p>`;
+}
+
+function GelmeyenSayisiniGuncelle() {
+    const donemKey = aktifYil + "_" + String(aktifAy).padStart(2, '0');
+    let gelmeyenSayisi = 0;
+    Object.keys(tumKullanicilar).forEach(perId => {
+        const p = tumKullanicilar[perId];
+        if (secilenDepartman !== "HEPSİ" && p.departman !== secilenDepartman) return;
+        const pDonemi = p.puantaj && p.puantaj[donemKey] ? p.puantaj[donemKey] : {};
+        if ((pDonemi[mobilSeciliGun] ? pDonemi[mobilSeciliGun].durum : "BOS") === "GELMEDI") gelmeyenSayisi++;
+    });
+    document.getElementById("gelmeyenButonMetni").innerText = `Gelmeyenler (${gelmeyenSayisi})`;
+}
+
+// =========================================================================
+// 6. PERSONEL ARAMA, SEÇME VE YÖNETİM MOTORLARI
+// =========================================================================
 function aramaYap() {
     const aramaMetni = document.getElementById("panelAramaKutusu").value.toLowerCase().trim();
     const satirlar = document.querySelectorAll("#tabloGövdeSatirlari tr");
@@ -371,12 +407,16 @@ function personelDuzenleHazirlik(id) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// Personel Silme İşlemi
 function personelSil(id) {
     if(confirm("Bu personeli ve tüm puantaj geçmişini silmek istediğinize emin misiniz?")) {
         db.ref("personeller/" + id).remove();
     }
 }
 
+// =========================================================================
+// 7. HÜCRE MODAL DÜZENLEME VE DETAY GEÇMİŞ MOTORLARI
+// =========================================================================
 function durumSecimPenceresi(perId, gunNo) {
     const p = tumKullanicilar[perId];
     document.getElementById("modalPersonelId").value = perId;
@@ -414,18 +454,6 @@ function gunlukVeriKaydet() {
     const veri = { durum: durum, normalMesai: durum === "GELDI" ? nMesai : 0, fazlaMesai: durum === "GELDI" ? fMesai : 0 };
 
     db.ref("personeller/" + perId + "/puantaj/" + donemKey + "/" + gunNo).set(veri).then(() => { modalKapat(); });
-}
-
-function GelmeyenSayisiniGuncelle() {
-    const donemKey = aktifYil + "_" + String(aktifAy).padStart(2, '0');
-    let gelmeyenSayisi = 0;
-    Object.keys(tumKullanicilar).forEach(perId => {
-        const p = tumKullanicilar[perId];
-        if (secilenDepartman !== "HEPSİ" && p.departman !== secilenDepartman) return;
-        const pDonemi = p.puantaj && p.puantaj[donemKey] ? p.puantaj[donemKey] : {};
-        if ((pDonemi[mobilSeciliGun] ? pDonemi[mobilSeciliGun].durum : "BOS") === "GELMEDI") gelmeyenSayisi++;
-    });
-    document.getElementById("gelmeyenButonMetni").innerText = `Gelmeyenler (${gelmeyenSayisi})`;
 }
 
 function mesaiDetayModaliAc(perId) {
@@ -466,6 +494,9 @@ function mesaiDetayModaliAc(perId) {
     document.getElementById("mesaiDetayModal").style.display = "block";
 }
 
+// =========================================================================
+// 8. EXCEL RAPORLAMA VE SAAT MOTORLARI
+// =========================================================================
 function excelAktar() {
     if (Object.keys(tumKullanicilar).length === 0) { alert("Rapora aktarılacak personel verisi bulunamadı!"); return; }
     const donemKey = aktifYil + "_" + String(aktifAy).padStart(2, '0');
