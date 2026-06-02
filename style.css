@@ -50,7 +50,7 @@ body { background-color: var(--main-bg); color: var(--text-dark); }
 .header-title p { font-size: 0.95rem; color: var(--text-muted); margin-top: 4px; }
 .action-group { display: flex; gap: 20px; align-items: center; }
 
-/* FİLTER */
+/* FILTER */
 .filter-container { background: var(--card-bg); border-radius: 14px; padding: 15px 20px; margin-bottom: 25px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px; }
 .filter-label { font-size: 0.85rem; font-weight: 700; color: var(--text-dark); white-space: nowrap; }
 .filter-buttons-group { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -112,17 +112,25 @@ td.sticky-col { background: white; }
 .form-group input, .form-group select { padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 0.95rem; }
 .btn-save { width: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
 
+/* RAPOR MODAL LİSTESİ */
 .mesai-detay-listesi { display: flex; flex-direction: column; gap: 10px; }
 .mesai-detay-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; }
 .detay-tarih { font-size: 0.9rem; display: flex; align-items: center; gap: 6px; }
 .bayram-etiket { background: #ffe4e6; color: #9f1239; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
-.detay-saatler { display: flex; gap: 8px; font-size: 0.85rem; font-weight: 600; }
-.normal-saat-yazi { color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
-.fazla-saat-yazi { color: #16a34a; background: rgba(34, 197, 94, 0.12); padding: 2px 6px; border-radius: 4px; }
+.detay-saatler { display: flex; gap: 6px; font-size: 0.82rem; font-weight: 600; }
 
-/* ========================================== */
-/* MANDATORY MOBİL KURALLARI         */
-/* ========================================== */
+.status-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+.status-badge.G_GELDI { background: var(--bg-geldi); color: var(--text-geldi); }
+.status-badge.G_GELMEDI { background: var(--bg-gelmedi); color: var(--text-gelmedi); }
+.status-badge.G_H_IZIN { background: var(--bg-hizin); color: var(--text-hizin); }
+.status-badge.G_Y_IZIN { background: var(--bg-yizin); color: var(--text-yizin); }
+.status-badge.G_C_IZIN { background: var(--bg-cizin); color: var(--text-cizin); }
+.status-badge.G_RAPOR { background: var(--bg-rapor); color: var(--text-rapor); }
+
+.normal-saat-yazi { color: #475569; background: #e2e8f0; padding: 3px 6px; border-radius: 6px; }
+.fazla-saat-yazi { color: #16a34a; background: rgba(34, 197, 94, 0.12); padding: 3px 6px; border-radius: 6px; border: 1px solid var(--border-geldi); }
+
+/* RESPONSIVE MOBİL KURALLARI */
 @media (max-width: 1024px) {
     .dashboard-container { flex-direction: column; }
     .sidebar { width: 100%; padding: 20px; border-bottom: 2px solid #1e293b; }
@@ -132,14 +140,11 @@ td.sticky-col { background: white; }
     .action-group { width: 100%; justify-content: space-between; }
     .filter-container { flex-direction: column; align-items: flex-start; gap: 10px; width: 100%; }
     
-    /* Masaüstü Tablosunu Gizle */
     .desktop-view-only { display: none; }
     
-    /* Mobil Araçları Göster */
     .mobile-day-selector-container { display: block; background: #ffffff; border-radius: 14px; padding: 12px; margin-bottom: 16px; border: 1px solid var(--border-color); }
     .mobile-selector-title { font-size: 0.8rem; font-weight: 700; color: var(--text-dark); display: block; margin-bottom: 10px; }
     
-    /* Mobil Gün Kaydırma Şeridi */
     .mobile-day-ribbon { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
     .btn-mobile-day { min-width: 42px; height: 42px; border-radius: 10px; background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; font-weight: 700; font-size: 0.9rem; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; shrink: 0; }
     .btn-mobile-day span { font-size: 0.55rem; font-weight: 500; color: var(--text-muted); margin-top: 1px; }
@@ -148,7 +153,6 @@ td.sticky-col { background: white; }
     .btn-mobile-day.m-weekend { background: #e2e8f0; }
     .btn-mobile-day.m-holiday { background: var(--bg-holiday); color: var(--text-holiday); }
 
-    /* Mobil Dikey Kart Tasarımları */
     .mobile-view-only { display: flex; flex-direction: column; gap: 12px; }
     .mobile-personnel-card { background: white; border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
     .m-per-meta { display: flex; flex-direction: column; gap: 2px; }
