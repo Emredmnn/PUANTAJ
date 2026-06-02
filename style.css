@@ -181,10 +181,16 @@ td.sticky-col { background: white; }
 .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 0.95rem; outline: none; }
 .btn-save { width: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; text-align: center; }
 
+/* MODAL İÇİ LİSTE TASARIMLARI VE MODERN SCROLLBAR */
 .mesai-detay-listesi { display: block; width: 100%; }
 .mesai-detay-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 8px; }
 .detay-tarih { font-size: 0.9rem; font-weight: 600; }
 .detay-saatler { font-size: 0.82rem; font-weight: 600; display: flex; gap: 4px; align-items: center; }
+
+.modal-body::-webkit-scrollbar { width: 6px; }
+.modal-body::-webkit-scrollbar-track { background: transparent; }
+.modal-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+.modal-body::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 .desktop-view-only { display: block; }
 .mobile-view-only, .mobile-day-selector-container { display: none; }
