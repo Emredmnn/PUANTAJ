@@ -122,7 +122,7 @@ function TabloBasliklariniOlustur() {
         const gunIndeks = tarihObj.getDay();
         const gunAdi = gunAdlari[gunIndeks];
 
-        let ekstraSinif = "";
+        let挤straSinif = "";
         if (gunIndeks === 0 || gunIndeks === 6) {
             ekstraSinif = "weekend";
         }
@@ -198,6 +198,7 @@ function TabloGövdesiniDoldur() {
         const fMesai = ToplamFazlaMesaiHesapla(p, donemKey);
         let satirHtml = `<tr>`;
         
+        // DEĞİŞİKLİK: Rozette kafa karıştırmaması için "+4 Sa" yerine sadece "4 Saat" yazması sağlandı
         satirHtml += `
             <td class="sticky-col">
                 <div class="personnel-cell-wrapper">
@@ -206,7 +207,7 @@ function TabloGövdesiniDoldur() {
                         <span>${p.departman}</span>
                     </div>
                     <div class="badge-and-actions">
-                        <span class="total-hours-badge" onclick="mesaiDetayModaliAc('${perId}')">+${fMesai} Sa</span>
+                        <span class="total-hours-badge" onclick="mesaiDetayModaliAc('${perId}')">${fMesai} Saat</span>
                         <div class="cell-actions">
                             <button class="btn-per-edit" onclick="personelDuzenleHazirlik('${perId}')"><i class="fa-solid fa-pen-to-square"></i></button>
                             <button class="btn-per-delete" onclick="personelSil('${perId}')"><i class="fa-solid fa-trash-can"></i></button>
@@ -446,7 +447,7 @@ function gelmeyenlerModaliAc() {
 
 function gelmeyenlerModalKapat() { document.getElementById("gelmeyenlerModal").style.display = "none"; }
 
-// KRİTİK GÜNCELLEME: BOŞ OLMAYAN VE SADECE ÇALIŞILAN GÜNLERİN RAPORLANMASI
+// DEĞİŞİKLİK: RAPOR PENCERESİNDE SADECE MESAİ GİRİLEN (GELDI) GÜNLER FİLTRELENDİ
 function mesaiDetayModaliAc(perId) {
     const p = tumKullanicilar[perId];
     document.getElementById("detayModalPersonelAdi").innerText = p.adSoyad;
@@ -468,7 +469,7 @@ function mesaiDetayModaliAc(perId) {
     for (let i = 1; i <= toplamGunSayisi; i++) {
         const kayit = pDonemi[i] || { durum: "BOS", normalMesai: 0, fazlaMesai: 0 };
         
-        // Sadece çalışılan (GELDI) günleri listele
+        // KRİTİK FİLTRE: Sadece çalışılan (GELDI) günleri ve saat verisi olanları listele
         if (kayit.durum !== "GELDI" || (parseInt(kayit.normalMesai) === 0 && parseInt(kayit.fazlaMesai) === 0)) {
             continue; 
         }
