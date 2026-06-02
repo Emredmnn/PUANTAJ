@@ -77,7 +77,7 @@
             <header class="top-header">
                 <div class="header-title">
                     <h1>Aylık Personel Puantaj Paneli</h1>
-                    <p>Eşzamanlı mobil görünüm, veri filtreleme ve anlık senkronizasyon</p>
+                    <p>Eşzamanlı mobil görünüm, veri filtreleme và anlık senkronizasyon</p>
                 </div>
                 
                 <div class="action-group">
@@ -214,14 +214,18 @@
                 <div class="modal-title-group" style="color: white;">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                     <div>
-                        <h3 id="gelmeyenlerModalBaslik" style="font-size: 1.1rem;">Eksik & İzinli Personel Listesi</h3>
-                        <p id="gelmeyenlerModalTarih" style="font-size: 0.78rem; opacity: 0.9; margin-top: 2px;">Seçili Gün</p>
+                        <h3 id="gelmeyenlerModalBaslik" style="font-size: 1.1rem;">Eksik & İzinli Listesi</h3>
+                        <p id="gelmeyenlerModalTarih" style="font-size: 0.78rem; opacity: 0.9; margin-top: 2px;">Sorgulanan Gün</p>
                     </div>
                 </div>
                 <span class="close-btn" onclick="gelmeyenlerModalKapat()" style="color: white;">&times;</span>
             </div>
-            <div class="modal-body" style="padding: 20px; max-height: 380px; overflow-y: auto;">
-                <div id="gelmeyenlerSirketListesi" class="mesai-detay-listesi"></div>
+            <div class="modal-body" style="padding: 20px;">
+                <div class="sorgu-alani" style="margin-bottom: 15px; background: #fff1f1; padding: 10px; border-radius: 12px; border: 1px solid #fecaca;">
+                    <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #b91c1c; margin-bottom: 5px;">Geriye Dönük Gün Seçin:</label>
+                    <input type="date" id="gelmeyenSorguTarihi" onchange="gelmeyenTarihDegisti(this.value)" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #f87171; outline: none; font-weight: 600;">
+                </div>
+                <div id="gelmeyenlerSirketListesi" class="mesai-detay-listesi" style="max-height: 300px; overflow-y: auto;"></div>
             </div>
         </div>
     </div>
