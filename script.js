@@ -1,17 +1,3 @@
-// --- FIREBASE BAĞLANTI AYARLARI ---
-// Firebase kütüphanelerini HTML'de en alta eklediğimiz için doğrudan modülleri çağırıyoruz
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-// !!! DİKKAT: Firebase Console -> Project Settings kısmındaki kendi bilgilerinle burayı doldurabilirsin.
-// Şimdilik sistemin çalışması için temel bulut mimarisini kuruyoruz.
-const firebaseConfig = {
-    databaseURL: "https://emre-duman-puantaj-default-rtdb.firebaseio.com" // Kendi veritabanı linkini buraya yapıştıracaksın
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
 // Global Değişkenler
 let otomasyonVerisi = [];
 let sistemLoglari = [];
@@ -33,20 +19,38 @@ document.addEventListener("DOMContentLoaded", () => {
     saatiBaslat();
     donemDegisti();
     
-    // --- SİHİRLİ EŞ ZAMANLI DİNLEYİCİ (CANLI SENKRONİZASYON) ---
-    // Başka bir tarayıcıda veri değiştiği an bu fonksiyon otomatik tetiklenir ve ekranı yeniler!
-    const puantajRef = ref(db, 'puantaj');
-    onValue(puantajRef, (snapshot) => {
-        const data = snapshot.val();
-        otomasyonVerisi = data ? Object.values(data) : [];
-        tabloyuCiz();
-    });
+    // --- ANLIK CANLI BULUT SENKRONİZASYONU ---
+    // Küresel window nesnesinden Firebase fonksiyonlarını güvenle dinliyoruz.
+    if (window.onValue && window.ref && window.db) {
+        const puantajRef = window.ref(window.db, 'puantaj');
+        window.onValue(puantajRef, (snapshot) => {
+            const data = snapshot.val();
+            otomasyonVerisi = data ? Object.values(data) : [];
+            tabloyuCiz();
+        });
 
-    const logRef = ref(db, 'loglar');
-    onValue(logRef, (snapshot) => {
-        const data = snapshot.val();
-        sistemLoglari = data ? Object.values(data) : [];
-    });
+        const logRef = window.ref(window.db, 'loglar');
+        window.onValue(logRef, (snapshot) => {
+            const data = snapshot.val();
+            sistemLoglari = data ? Object.values(data) : [];
+        });
+    } else {
+        // Firebase yüklenene kadar küçük bir gecikmeyle tekrar dene
+        setTimeout(() => {
+            const puantajRef = window.ref(window.db, 'puantaj');
+            window.onValue(puantajRef, (snapshot) => {
+                const data = snapshot.val();
+                otomasyonVerisi = data ? Object.values(data) : [];
+                tabloyuCiz();
+            });
+
+            const logRef = window.ref(window.db, 'loglar');
+            window.onValue(logRef, (snapshot) => {
+                const data = snapshot.val();
+                sistemLoglari = data ? Object.values(data) : [];
+            });
+        }, 1000);
+    }
 });
 
 function saatiBaslat() {
@@ -77,6 +81,7 @@ function resmiTatilMi(ay, gun) { return resmiTatiller[`${ay}-${gun}`] ? true : f
 
 function basliklariCiz() {
     const headerSatiri = document.getElementById("tabloBaslikSatiri");
+    if(!headerSatiri) return;
     headerSatiri.innerHTML = '<th class="sticky-col">Personel & Görev Dağılımı</th>';
     const toplamGun = ayinGunSayisi(mevcutYil, mevcutAy);
     const gunAdlari = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
@@ -102,8 +107,8 @@ function görevFiltrele(görevTürü) {
 }
 
 // BULUTA VERİ YAZMA MOTORLARI
-function bulutaPuantajGonder(id, veri) { set(ref(db, 'puantaj/' + id), veri); }
-function bulutaLogGonder(log) { set(ref(db, 'loglar/' + log.id), log); }
+function bulutaPuantajGonder(id, veri) { window.set(window.ref(window.db, 'puantaj/' + id), veri); }
+function bulutaLogGonder(log) { window.set(window.ref(window.db, 'loglar/' + log.id), log); }
 
 function personelEkle() {
     const ad = document.getElementById("perAdSoyad").value.trim();
@@ -121,7 +126,7 @@ function personelEkle() {
 
 function personelSil(id) {
     if(confirm("Bu personeli silmek istediğinize emin misiniz?")) {
-        set(ref(db, 'puantaj/' + id), null); // Firebase'den siler
+        window.set(window.ref(window.db, 'puantaj/' + id), null); 
     }
 }
 
@@ -140,7 +145,7 @@ function personelKartiniGuncelle() {
 function toplamFazlaMesaiHesapla(personel) {
     let toplamFM = 0;
     if(personel.gunler) {
-        Object.values(personel.gunler).forEach(g => { if(g.durum === "GELDI") toplamFM += g.fazlaMesai; });
+        Object.values(personel.gunler).forEach(g => { if(g.durum === "GELDI") toplamFM += (parseInt(g.fazlaMesai) || 0); });
     }
     return toplamFM;
 }
@@ -150,7 +155,7 @@ function raporlariGuncelle(filtrelenmişList) {
     filtrelenmişList.forEach(per => {
         if(per.gunler) {
             Object.values(per.gunler).forEach(g => {
-                if(g.durum === "GELDI") { toplamG++; toplamFM += g.fazlaMesai; }
+                if(g.durum === "GELDI") { toplamG++; toplamFM += (parseInt(g.fazlaMesai) || 0); }
                 else if(g.durum === "RAPOR") toplamR++;
                 else if(["H_IZIN", "Y_IZIN", "C_IZIN"].includes(g.durum)) toplamIzin++;
             });
@@ -186,7 +191,9 @@ function tabloyuCiz() {
                     <div style="font-weight:700; color:var(--text-dark); font-size:0.95rem;">${per.ad}</div>
                     <div style='color:var(--text-muted); font-size:0.75rem; font-weight:600; margin-top:2px;'>${per.grup}</div>
                 </div>
-                <div class="total-hours-badge">+${ekstraMesaiSaati} Sa</div>
+                <div class="total-hours-badge" style="cursor:pointer;" onclick="personelMesaiDetayAc(${per.id})" title="Tarihsel Detayları Gör">
+                    +${ekstraMesaiSaati} Sa
+                </div>
                 <div class="cell-actions">
                     <button onclick="personelDuzenleModaliAc(${per.id})" class="btn-per-edit"><i class="fa-solid fa-user-pen"></i></button>
                     <button onclick="personelSil(${per.id})" class="btn-per-delete"><i class="fa-solid fa-user-xmark"></i></button>
@@ -222,7 +229,6 @@ function tabloyuCiz() {
 
 function chefDüzenlemeModaliAc(perId, gun, veri) {
     seciliPersonelId = perId; seciliGun = gun;
-    const per = otomasyonVerisi.find(p => p.id === perId);
     document.getElementById("modalBaslik").innerText = `${gun}. Gün Düzenleme`;
     document.getElementById("modalDurum").value = veri.durum;
     document.getElementById("modalNormalMesai").value = veri.durum === "BOS" ? 9 : (veri.normalMesai || 9);
@@ -249,7 +255,7 @@ function gunlukVeriKaydet() {
     const per = otomasyonVerisi.find(p => p.id === seciliPersonelId);
     if (per) {
         const eskiVeri = per.gunler[seciliGun] || { durum: "BOS", normalMesai: 0, fazlaMesai: 0 };
-        const eskiToplam = (eskiVeri.normalMesai || 0) + (eskiVeri.fazlaMesai || 0);
+        const eskiToplam = (parseInt(eskiVeri.normalMesai) || 0) + (parseInt(eskiVeri.fazlaMesai) || 0);
 
         if (eskiToplam !== yeniToplam && yeniDurum === "GELDI") {
             const simdi = new Date();
@@ -259,14 +265,16 @@ function gunlukVeriKaydet() {
         }
 
         if (yeniDurum !== "GELDI") { yeniNormal = 0; yeniFazla = 0; }
+        if (!per.gunler) per.gunler = {};
         per.gunler[seciliGun] = { durum: yeniDurum, normalMesai: yeniNormal, fazlaMesai: yeniFazla };
-        bulutaPuantajGonder(per.id, per); // BULUTA OTOMATİK ANLIK GÖNDERİM
+        bulutaPuantajGonder(per.id, per); 
     }
     modalKapat();
 }
 
 function logModalAc() {
     const logListesi = document.getElementById("logListesi");
+    if(!logListesi) return;
     logListesi.innerHTML = "";
     if (sistemLoglari.length === 0) { logListesi.innerHTML = "<p style='text-align:center; padding:20px; color:#94a3b8;'>Hareket yok.</p>"; }
     else {
@@ -282,7 +290,54 @@ function logModalKapat() { document.getElementById("logModal").style.display = "
 function editPersonnelModalKapat() { document.getElementById("editPersonnelModal").style.display = "none"; }
 function personelDuzenleModaliAc(id) { seciliPersonelId = id; const per = otomasyonVerisi.find(p => p.id === id); if(per) { document.getElementById("editPerAdSoyad").value = per.ad; document.getElementById("editPerGrup").value = per.grup; document.getElementById("editPersonnelModal").style.display = "block"; } }
 
+// --- YENİ SİHİRLİ ÖZELLİK: TARİHSEL MESAİ DETAY PENCERESİ MOTORU ---
+function personelMesaiDetayAc(id) {
+    const per = otomasyonVerisi.find(p => p.id === id);
+    if(!per) return;
+    
+    document.getElementById("mesaiDetayBaslik").innerText = `${per.ad} - Mesai Geçmişi`;
+    const listeYüzeyi = document.getElementById("mesaiDetayListesi");
+    listeYüzeyi.innerHTML = "";
+    
+    let mesaiVarMi = false;
+    const ayIsmi = (mevcutAy + 1).toString().padStart(2, '0');
+    
+    if(per.gunler) {
+        Object.keys(per.gunler).forEach(gun => {
+            const veri = per.gunler[gun];
+            // Sadece fazla mesaisi 0'dan büyük ve durumu GELDİ olan günleri süzüyoruz
+            if(veri.durum === "GELDI" && (parseInt(veri.fazlaMesai) || 0) > 0) {
+                mesaiVarMi = true;
+                const tarihHücresi = document.createElement("div");
+                tarihHücresi.className = "log-item";
+                tarihHücresi.style.borderLeftColor = "#10b981"; // Yeşil başarı çizgisi
+                
+                tarihHücresi.innerHTML = `
+                    <span class="log-time"><i class="fa-solid fa-calendar-day"></i> ${gun.padStart(2, '0')}.${ayIsmi}.${mevcutYil}</span>
+                    <div class="log-text">
+                        Normal Mesai: <strong>${veri.normalMesai || 9} Saat</strong><br>
+                        Fazla Mesai: <span class="log-badge" style="color:#10b981;">+${veri.fazlaMesai} Saat</span>
+                    </div>
+                `;
+                listeYüzeyi.appendChild(tarihHücresi);
+            }
+        });
+    }
+    
+    if(!mesaiVarMi) {
+        listeYüzeyi.innerHTML = `<p style='text-align:center; padding:30px; color:#94a3b8; font-size:0.85rem;'><i class="fa-solid fa-circle-info"></i> Bu personelin bu dönemde fazla mesai kaydı bulunmamaktadır.</p>`;
+    }
+    
+    document.getElementById("mesaiDetayModal").style.display = "block";
+}
+
+function mesaiDetayModalKapat() {
+    document.getElementById("mesaiDetayModal").style.display = "none";
+}
+
+// Fonksiyonları Dış Dünyaya (HTML Butonlarına) Açma
 window.personelEkle = personelEkle; window.personelSil = personelSil; window.personelDuzenleModaliAc = personelDuzenleModaliAc;
 window.editPersonnelModalKapat = editPersonnelModalKapat; window.personelKartiniGuncelle = personelKartiniGuncelle;
 window.logModalAc = logModalAc; window.logModalKapat = logModalKapat; window.modalKapat = modalKapat;
 window.gunlukVeriKaydet = gunlukVeriKaydet; window.donemDegisti = donemDegisti; window.görevFiltrele = görevFiltrele;
+window.personelMesaiDetayAc = personelMesaiDetayAc; window.mesaiDetayModalKapat = mesaiDetayModalKapat;
