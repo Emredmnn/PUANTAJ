@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ED YAZILIM | Cloud Puantaj Otomasyonu</title>
     
-    <link rel="stylesheet" href="style.css?v=6.0.0">
+    <link rel="stylesheet" href="style.css?v=6.1.0">
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -65,7 +65,7 @@
                     <span class="pulse-dot" id="sync-status-dot"></span>
                     <p id="sync-status-text">Bulut Sunucusuna Bağlanıyor...</p>
                 </div>
-                <span>v6.0.0 Cloud Sync</span>
+                <span>v6.1.0 Cloud Mobile</span>
             </div>
         </aside>
 
@@ -73,10 +73,10 @@
             <header class="top-header">
                 <div class="header-title">
                     <h1>Aylık Personel Puantaj Paneli</h1>
-                    <p>Eşzamanlı çoklu cihaz desteği, bulut veritabanı entegrasyonu ve mesai geçmişi</p>
+                    <p>Eşzamanlı çoklu cihaz desteği, mobil akıllı görünüm ve mesai geçmişi</p>
                 </div>
                 
-                <div class="action-group" style="display: flex; gap: 20px; align-items: center;">
+                <div class="action-group">
                     <button onclick="excelAktar()" class="btn-excel">
                         <i class="fa-solid fa-file-excel"></i> Excel Raporu Al (.XLSX)
                     </button>
@@ -108,7 +108,13 @@
                 </div>
             </div>
 
-            <div class="puantaj-card">
+            <div class="mobile-day-selector-container">
+                <span class="mobile-selector-title"><i class="fa-regular fa-calendar-check"></i> İşlem Yapılacak Gün Seçin:</span>
+                <div class="mobile-day-ribbon" id="mobilGunSeridi">
+                    </div>
+            </div>
+
+            <div class="puantaj-card desktop-view-only">
                 <div class="table-responsive">
                     <table id="anaTablo">
                         <thead>
@@ -121,6 +127,9 @@
                     </table>
                 </div>
             </div>
+
+            <div class="mobile-view-only" id="mobilKartKapsayici">
+                </div>
         </main>
     </div>
 
@@ -193,7 +202,7 @@
     </div>
 
     <div id="mesaiDetayModal" class="modal">
-        <div class="modal-content" style="width: 440px; border-radius: 24px;">
+        <div class="modal-content" style="width: 90%; max-width: 440px; border-radius: 24px; margin: 20% auto;">
             <div class="modal-header" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; padding: 20px 24px;">
                 <div class="modal-title-group" style="color: white;">
                     <i class="fa-solid fa-clock-history" style="color: #3b82f6;"></i>
@@ -210,6 +219,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=6.0.0"></script>
+    <script src="script.js?v=6.1.0"></script>
 </body>
 </html>
