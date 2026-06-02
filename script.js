@@ -433,14 +433,21 @@ function GelmeyenSayisiniGuncelle() {
     document.getElementById("gelmeyenButonMetni").innerText = `Gelmeyenler (${gelmeyenSayisi})`;
 }
 
-// Gelmeyen Personel Listesi Penceresini Açar
+// GÜNCELLEME: İşe Gelmeyenler Modaline Tarih ve Tüm İzin Türleri Entegre Edildi
 function gelmeyenlerModaliAc() {
     const listeAlani = document.getElementById("gelmeyenlerSirketListesi");
     if(!listeAlani) return;
     listeAlani.innerHTML = "";
 
     const ayAdlari = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-    document.getElementById("gelmeyenlerModalTarih").innerText = mobilSeciliGun + " " + ayAdlari[aktifAy - 1] + " " + aktifYil + " Eksik Çetele";
+    const gunAdlari = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
+    
+    // Seçili günün tam tarihini ve gün adını hesapla
+    const seciliTarihObj = new Date(aktifYil, aktifAy - 1, mobilSeciliGun);
+    const gunAdi = gunAdlari[seciliTarihObj.getDay()];
+    
+    // Modal başlığındaki tarihi dinamik yapıyoruz
+    document.getElementById("gelmeyenlerModalTarih").innerText = `${mobilSeciliGun} ${ayAdlari[aktifAy - 1]} ${aktifYil}, ${gunAdi}`;
 
     const donemKey = aktifYil + "_" + String(aktifAy).padStart(2, '0');
     let sayac = 0;
@@ -452,8 +459,24 @@ function gelmeyenlerModaliAc() {
         const pDonemi = p.puantaj && p.puantaj[donemKey] ? p.puantaj[donemKey] : {};
         const durum = pDonemi[mobilSeciliGun] ? pDonemi[mobilSeciliGun].durum : "BOS";
 
-        if (durum === "GELMEDI") {
+        // Sadece GELDI veya BOS olmayanları (yani eksik/izinli olan tüm listeyi) yakalıyoruz
+        if (durum !== "GELDI" && durum !== "BOS") {
             sayac++;
+            
+            let durumRozeti = "";
+            // İzin ve gelmeme durumlarına göre kurumsal rozet stilleri oluşturuyoruz
+            if (durum === "GELMEDI") {
+                durumRozeti = `<span style="background:#fee2e2; color:#ef4444; font-size:11px; font-weight:700; padding:4px 8px; border-radius:6px;">GELMEDİ</span>`;
+            } else if (durum === "H_IZIN") {
+                durumRozeti = `<span style="background:#fef08a; color:#a16207; font-size:11px; font-weight:700; padding:4px 8px; border-radius:6px;">HAFTALIK İZİN</span>`;
+            } else if (durum === "Y_IZIN") {
+                durumRozeti = `<span style="background:#dbeafe; color:#2563eb; font-size:11px; font-weight:700; padding:4px 8px; border-radius:6px;">YILLIK İZİN</span>`;
+            } else if (durum === "C_IZIN") {
+                durumRozeti = `<span style="background:#f1f5f9; color:#0f172a; font-size:11px; font-weight:700; padding:4px 8px; border-radius:6px;">CENAZE İZNİ</span>`;
+            } else if (durum === "RAPOR") {
+                durumRozeti = `<span style="background:#f3e8ff; color:#7e22ce; font-size:11px; font-weight:700; padding:4px 8px; border-radius:6px;">SAĞLIK RAPORU</span>`;
+            }
+
             listeAlani.innerHTML += `
                 <div class="mesai-detay-item">
                     <div class="detay-tarih">
@@ -461,7 +484,7 @@ function gelmeyenlerModaliAc() {
                         <span style="font-size:11px; color:#64748b; display:block;">${p.departman}</span>
                     </div>
                     <div class="detay-saatler">
-                        <span style="background:#fee2e2; color:#ef4444; font-size:11px; font-weight:700; padding:4px 8px; border-radius:6px;">GELMEDİ</span>
+                        ${durumRozeti}
                     </div>
                 </div>
             `;
@@ -469,7 +492,7 @@ function gelmeyenlerModaliAc() {
     });
 
     if (sayac === 0) {
-        listeAlani.innerHTML = `<p style="text-align:center; color:#64748b; padding:20px 0;">Bugün işe gelmeyen personel bulunmuyor şefim!</p>`;
+        listeAlani.innerHTML = `<p style="text-align:center; color:#64748b; padding:20px 0;">Bugün eksik veya izinli personel bulunmuyor şefim!</p>`;
     }
     document.getElementById("gelmeyenlerModal").style.display = "block";
 }
