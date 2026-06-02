@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ISS Catering | Enterprise Puantaj Otomasyonu</title>
+    <title>ED YAZILIM | Enterprise Puantaj Otomasyonu</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -15,10 +15,11 @@
         
         <aside class="sidebar">
             <div class="brand">
-                <div class="logo-icon"><i class="fa-solid fa-fire-burner"></i></div>
+                <img src="logo.png.png" alt="ED YAZILIM Logo" class="brand-logo-img" onerror="this.style.display='none'; document.getElementById('logo-backup').style.display='flex';">
+                <div id="logo-backup" class="logo-icon" style="display:none;"><i class="fa-solid fa-code"></i></div>
                 <div class="brand-text">
-                    <h3>ISS Catering</h3>
-                    <p>Hospital Operations</p>
+                    <h3>ED YAZILIM</h3>
+                    <p>Puantaj Otomasyon Sistemi</p>
                 </div>
             </div>
 
@@ -58,9 +59,9 @@
             <div class="sidebar-footer">
                 <div class="status-indicator">
                     <span class="pulse-dot"></span>
-                    <p>Arşivleme & Veri Koruma Aktif</p>
+                    <p>Bulut Eşitleme Aktif (Multi-Device)</p>
                 </div>
-                <span>v5.5.0 Enterprise</span>
+                <span>v5.6.0 Enterprise</span>
             </div>
         </aside>
 
@@ -68,7 +69,7 @@
             <header class="top-header">
                 <div class="header-title">
                     <h1>Aylık Personel Puantaj Paneli</h1>
-                    <p>Dönemsel personel devam durumları, anlık ekstra mesai toplamları ve yönetim ekranı</p>
+                    <p>Eşzamanlı çoklu cihaz desteği ve departman bazlı dinamik görev kırılımları</p>
                 </div>
                 
                 <div class="action-group" style="display: flex; gap: 20px; align-items: center;">
@@ -91,13 +92,25 @@
                 </div>
             </header>
 
+            <div class="filter-container">
+                <span class="filter-label"><i class="fa-solid fa-sliders"></i> Departman Filtrele:</span>
+                <div class="filter-buttons-group" id="departmanFiltre Grubu">
+                    <button class="btn-filter active" onclick="filtreleDepartman('HEPSİ', this)">Herkesi Göster</button>
+                    <button class="btn-filter" onclick="filtreleDepartman('Üretim Personeli', this)">Mutfak / Üretim</button>
+                    <button class="btn-filter" onclick="filtreleDepartman('Garson', this)">Servis / Garson</button>
+                    <button class="btn-filter" onclick="filtreleDepartman('Bulaşıkhane Personeli', this)">Bulaşıkhane</button>
+                    <button class="btn-filter" onclick="filtreleDepartman('Şef Garson', this)">Şef Garson</button>
+                    <button class="btn-filter" onclick="filtreleDepartman('Depo Personeli', this)">Depo Yönetimi</button>
+                </div>
+            </div>
+
             <div class="puantaj-card">
                 <div class="table-responsive">
                     <table id="anaTablo">
                         <thead>
                             <tr id="tabloBaslikSatiri">
                                 <th class="sticky-col">Personel & Görev Dağılımı</th>
-                                </tr>
+                            </tr>
                         </thead>
                         <tbody>
                             </tbody>
@@ -151,7 +164,7 @@
                     <i class="fa-solid fa-user-pen"></i>
                     <h3>Personel Kartını Düzenle</h3>
                 </div>
-                <span class="close-btn" onclick="editPersonnelModalKapat()" style="color: #94a3b8;">&times;</span>
+                <span class="close-btn" onclick="editPersonnelModalKapat()" style="color: #94a3b8; opacity: 0.8;">&times;</span>
             </div>
             <div class="modal-body">
                 <div class="form-group">
