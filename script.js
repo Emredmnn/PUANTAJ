@@ -5,7 +5,7 @@ const FIREBASE_URL = "https://puantaj-51bda-default-rtdb.europe-west1.firebaseda
 
 let otomasyonVerisi = [];
 let seciliPersonelId = null;
-let seciliGun = 1; // Varsayılan olarak 1. gün seçili başlasın
+let seciliGun = 1; 
 let mevcutYil = 2026;
 let mevcutAy = 5; 
 let aktifFiltreDepartman = "HEPSİ";
@@ -29,8 +29,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     saatiBaslat();
     basliklariCiz();
-    
-    // Canlı veri dinlemeyi başlatır
     canliBulutVeritabaniniDinle();
 
     window.onclick = function(event) {
@@ -114,7 +112,7 @@ function donemDegisti() {
     const parts = val.split("-");
     mevcutYil = parseInt(parts[0]);
     mevcutAy = parseInt(parts[1]) - 1;
-    seciliGun = 1; // Dönem değişince günü 1'e sıfırla
+    seciliGun = 1; 
     basliklariCiz();
     tabloyuCiz();
 }
@@ -139,7 +137,6 @@ function basliklariCiz() {
             headerSatiri.appendChild(th);
         }
     }
-    // Mobil gün şeridini de eşzamanlı çizdiriyoruz
     mobilGunSeridiniCiz();
 }
 
@@ -197,6 +194,7 @@ function toplamFazlaMesaiHesapla(personel) {
     return toplamFM;
 }
 
+// KRİTİK GÜNCELLEME: DETAYLI MESAİ RAPORUNDA BOŞ GÜNLERİ GÖSTERMEZ
 function mesaiDetayModaliAc(personelId) {
     const per = otomasyonVerisi.find(p => p.id === personelId);
     if (!per) return;
@@ -205,30 +203,57 @@ function mesaiDetayModaliAc(personelId) {
     document.getElementById("detayModalDonemYazi").innerText = `${aylar[mevcutAy]} ${mevcutYil} - Detaylı Mesai Raporu`;
     const listeKapsayici = document.getElementById("mesaiDetayListesi");
     listeKapsayici.innerHTML = "";
-    let mesaiVarMi = false;
+    
+    let kayitliGunVarMi = false;
     const toplamGun = ayinGunSayisi(mevcutYil, mevcutAy);
 
     for (let g = 1; g <= toplamGun; g++) {
         if(per.gunler && per.gunler[g]) {
             const gunVeri = per.gunler[g];
-            if (gunVeri.durum === "GELDI" && (gunVeri.fazlaMesai > 0 || gunVeri.normalMesai > 0)) {
-                mesaiVarMi = true;
-                let bayramNotu = resmiTatilMi(mevcutAy, g) ? `<span class="bayram-etiket">Bayram</span>` : "";
-                const gunSatiri = document.createElement("div");
-                gunSatiri.className = "mesai-detay-item";
-                gunSatiri.innerHTML = `<div class="detay-tarih"><strong>${g.toString().padStart(2,'0')}.${(mevcutAy+1).toString().padStart(2,'0')}.${mevcutYil}</strong> ${bayramNotu}</div><div class="detay-saatler"><span class="normal-saat-yazi">${gunVeri.normalMesai} Sa</span><span class="fazla-saat-yazi">+${gunVeri.fazlaMesai} Sa</span></div>`;
-                listeKapsayici.appendChild(gunSatiri);
-            }
+            
+            // Eğer durum 'BOS' ise bu günü rapora dahil etme (Atla)
+            if (gunVeri.durum === "BOS") continue;
+
+            kayitliGunVarMi = true;
+            let bayramNotu = resmiTatilMi(mevcutAy, g) ? `<span class="bayram-etiket">Bayram</span>` : "";
+            
+            let durumYazi = "";
+            let saatDetay = "";
+            
+            if (gunVeri.durum === "GELDI") {
+                durumYazi = `<span class="status-badge G_GELDI">Geldi</span>`;
+                saatDetay = `<span class="normal-saat-yazi">${gunVeri.normalMesai} Sa</span> <span class="fazla-saat-yazi">+${gunVeri.fazlaMesai} Sa</span>`;
+            } else if (gunVeri.durum === "GELMEDI") durumYazi = `<span class="status-badge G_GELMEDI">YOK</span>`;
+            else if (gunVeri.durum === "H_IZIN") durumYazi = `<span class="status-badge G_H_IZIN">H. İzin</span>`;
+            else if (gunVeri.durum === "Y_IZIN") durumYazi = `<span class="status-badge G_Y_IZIN">Y. İzin</span>`;
+            else if (gunVeri.durum === "C_IZIN") durumYazi = `<span class="status-badge G_C_IZIN">C. İzin</span>`;
+            else if (gunVeri.durum === "RAPOR") durumYazi = `<span class="status-badge G_RAPOR">Raporlu</span>`;
+
+            const gunSatiri = document.createElement("div");
+            gunSatiri.className = "mesai-detay-item";
+            gunSatiri.innerHTML = `
+                <div class="detay-tarih">
+                    <strong>${g.toString().padStart(2,'0')}.${(mevcutAy+1).toString().padStart(2,'0')}.${mevcutYil}</strong> 
+                    ${bayramNotu}
+                </div>
+                <div class="detay-saatler">
+                    ${durumYazi}
+                    ${saatDetay}
+                </div>
+            `;
+            listeKapsayici.appendChild(gunSatiri);
         }
     }
-    if (!mesaiVarMi) { listeKapsayici.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:0.9rem;">Mesai kaydı bulunamadı.</div>`; }
+    
+    if (!kayitliGunVarMi) { 
+        listeKapsayici.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:0.9rem;">Bu aya ait işlenmiş puantaj kaydı bulunamadı.</div>`; 
+    }
     document.getElementById("mesaiDetayModal").style.display = "block";
 }
+
 function mesaiDetayModalKapat() { document.getElementById("mesaiDetayModal").style.display = "none"; }
 
-// ANA TABLO VE MOBİL KARTLARI ÇİZEN MERKEZİ GÜNCEL FONKSİYON
 function tabloyuCiz() {
-    // 1. Masaüstü Görünümünü Çiz
     const tbody = document.querySelector("#anaTablo tbody");
     const donemKey = `${mevcutYil}-${mevcutAy}`;
     let filtrelenmisList = otomasyonVerisi.filter(p => p && p.donem === donemKey);
@@ -287,8 +312,6 @@ function tabloyuCiz() {
             });
         }
     }
-
-    // 2. Mobil Görünümü Çiz (Hata Çözen Kısım)
     mobilKartlariCiz();
 }
 
@@ -333,6 +356,7 @@ function gunlukVeriKaydet() {
     modalKapat();
 }
 
+// KRİTİK GÜNCELLEME: EXCEL ÇIKTISINDA DA BOŞ BARKILAN GÜNLERİ DEĞERLENDİRİR
 function excelAktar() {
     const donemKey = `${mevcutYil}-${mevcutAy}`;
     let buAyinPersonelleri = otomasyonVerisi.filter(p => p && p.donem === donemKey);
@@ -349,7 +373,7 @@ function excelAktar() {
         let satir = [per.ad, per.grup, toplamFazlaMesaiHesapla(per)];
         for(let g=1; g<=toplamGun; g++) {
             let gVeri = per.gunler ? per.gunler[g] : null;
-            if(!gVeri || gVeri.durum === "BOS") satir.push("-");
+            if(!gVeri || gVeri.durum === "BOS") satir.push("-"); // Excel'de de veri girilmeyenler sadeleşti
             else if(gVeri.durum === "GELDI") satir.push(gVeri.fazlaMesai > 0 ? `G (+${gVeri.fazlaMesai}s)` : "G");
             else satir.push(gVeri.durum);
         }
@@ -360,10 +384,6 @@ function excelAktar() {
     XLSX.utils.book_append_sheet(wb, ws, "Puantaj Raporu");
     XLSX.writeFile(wb, `ED_Yazilim_Puantaj_Raporu_${aktifFiltreDepartman}.xlsx`);
 }
-
-// =========================================================================
-// MOBİL GÖRÜNÜM MOTORU VE AKILLI KART ALTYAPISI (MOBİL HATA ÇÖZÜMLERİ)
-// =========================================================================
 
 function mobilGunSeridiniCiz() {
     const serit = document.getElementById("mobilGunSeridi");
@@ -424,7 +444,6 @@ function mobilKartlariCiz() {
         else if (gunVerisi.durum === "C_IZIN") harf = "C.İ";
         else if (gunVerisi.durum === "RAPOR") harf = "R";
 
-        // ÇÖZÜM: onclick tetikleyicisini güvenli hale getirdik ve buton tıklama alanı büyütüldü
         kart.innerHTML = `
             <div class="m-card-left">
                 <div class="m-per-meta">
