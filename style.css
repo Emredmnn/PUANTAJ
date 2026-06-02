@@ -10,8 +10,8 @@
     --excel-color: #10b981;
 
     /* Hafta Sonu ve Resmi Tatil Yoğun Tonları */
-    --bg-weekend: #e2e8f0;       /* Daha koyu ve belirgin gri */
-    --bg-holiday: #ffe4e6;       /* Soft Kurumsal Kırmızı/Turuncu Tatil Tonu */
+    --bg-weekend: #e2e8f0;       
+    --bg-holiday: #ffe4e6;       
     --text-holiday: #9f1239;
 
     /* Premium Pastel Durum Tonları */
@@ -27,12 +27,13 @@
 body { background-color: var(--main-bg); color: var(--text-dark); }
 .dashboard-container { display: flex; min-height: 100vh; }
 
-/* SIDEBAR */
-.sidebar { width: 300px; background-color: var(--sidebar-bg); color: white; padding: 30px 24px; display: flex; flex-direction: column; }
+/* SIDEBAR & BRAND LOGO */
+.sidebar { width: 300px; background-color: var(--sidebar-bg); color: white; padding: 30px 24px; display: flex; flex-direction: column; shrink: 0; }
 .brand { display: flex; align-items: center; gap: 14px; padding-bottom: 25px; border-bottom: 1px solid #1e293b; }
+.brand-logo-img { width: 44px; height: 44px; border-radius: 12px; object-fit: contain; }
 .logo-icon { background: linear-gradient(135deg, #3b82f6, #2563eb); width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
-.brand-text h3 { font-size: 1.1rem; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
-.brand-text p { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+.brand-text h3 { font-size: 1.1rem; font-weight: 700; margin: 0; letter-spacing: -0.02em; color: #ffffff; }
+.brand-text p { font-size: 0.75rem; color: #3b82f6; margin-top: 2px; font-weight: 600; text-transform: uppercase; }
 
 .sidebar-section { margin-top: 25px; }
 .sidebar-section h4 { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; font-weight: 700; }
@@ -55,15 +56,23 @@ body { background-color: var(--main-bg); color: var(--text-dark); }
 
 /* MAIN CONTENT */
 .main-content { flex: 1; padding: 40px; overflow-x: hidden; }
-.top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 20px; }
 .header-title h1 { font-size: 1.75rem; font-weight: 700; color: var(--text-dark); letter-spacing: -0.03em; }
 .header-title p { font-size: 0.95rem; color: var(--text-muted); margin-top: 4px; }
 
-.btn-excel { background: var(--excel-color); color: white; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15); }
+/* DEPARTMAN FİLTRE BAR TASARIMI (Yeni Premium Grid) */
+.filter-container { background: var(--card-bg); border-radius: 14px; padding: 15px 20px; margin-bottom: 25px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px; }
+.filter-label { font-size: 0.85rem; font-weight: 700; color: var(--text-dark); white-space: nowrap; }
+.filter-buttons-group { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-filter { background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+.btn-filter:hover { background: #e2e8f0; color: var(--text-dark); }
+.btn-filter.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); }
+
+.btn-excel { background: var(--excel-color); color: white; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15); shrink: 0; }
 .btn-excel:hover { background: #059669; transform: translateY(-1px); }
 
 /* ZAMAN KARTI */
-.premium-clock-widget { background: #0f172a; border-radius: 14px; display: flex; overflow: hidden; border: 1px solid #1e293b; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+.premium-clock-widget { background: #0f172a; border-radius: 14px; display: flex; overflow: hidden; border: 1px solid #1e293b; box-shadow: 0 4px 15px rgba(0,0,0,0.08); shrink: 0; }
 .widget-date-block { padding: 10px 18px; display: flex; align-items: center; gap: 10px; background: #1e293b; color: white; }
 #live-date-day { font-size: 1.8rem; font-weight: 800; color: #3b82f6; line-height: 1; }
 .widget-date-block div { display: flex; flex-direction: column; }
@@ -75,30 +84,28 @@ body { background-color: var(--main-bg); color: var(--text-dark); }
 /* PUANTAJ TABLOSU */
 .puantaj-card { background: var(--card-bg); border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04); border: 1px solid var(--border-color); overflow: hidden; }
 .table-responsive { overflow-x: auto; width: 100%; }
-table { width: 100%; border-collapse: collapse; }
-th, td { padding: 10px 6px; border-bottom: 1px solid var(--border-color); border-right: 1px solid #f1f5f9; text-align: center; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+th, td { padding: 10px 6px; border-bottom: 1px solid var(--border-color); border-right: 1px solid #f1f5f9; text-align: center; vertical-align: middle; }
 
-th.day-th { min-width: 45px; font-size: 0.7rem; padding: 8px 4px; line-height: 1.3; }
+th.day-th { width: 50px; min-width: 50px; font-size: 0.7rem; padding: 8px 4px; line-height: 1.3; }
 th.day-th span { display: block; font-size: 0.6rem; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
 
-/* Gün Hücrelerinin Koyu Renk Varyasyonları */
 th.weekend, td.weekend { background-color: var(--bg-weekend) !important; }
 th.public-holiday, td.public-holiday { background-color: var(--bg-holiday) !important; color: var(--text-holiday) !important; }
 th.public-holiday span { color: var(--text-holiday) !important; font-weight: 600; }
 
-.sticky-col { position: sticky; left: 0; background: #f8fafc; min-width: 320px; text-align: left; z-index: 5; border-right: 2px solid var(--border-color) !important; padding-left: 15px; padding-right: 15px; }
+.sticky-col { position: sticky; left: 0; background: #f8fafc; width: 320px; min-width: 320px; text-align: left; z-index: 5; border-right: 2px solid var(--border-color) !important; padding-left: 15px; padding-right: 15px; }
 td.sticky-col { background: white; }
 
 .personnel-cell-wrapper { display: flex; justify-content: space-between; align-items: center; width: 100%; }
 .personnel-info { flex-grow: 1; }
-
-/* Toplam Ekstra Mesai Rozeti */
-.total-hours-badge { background: #fef2f2; color: #ef4444; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; border: 1px solid #fee2e2; white-space: nowrap; margin-right: 5px; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.05); }
+.total-hours-badge { background: #fef2f2; color: #ef4444; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; border: 1px solid #fee2e2; white-space: nowrap; margin-right: 5px; }
 
 .cell-actions { display: flex; gap: 2px; }
-.btn-per-edit { background: transparent; border: none; color: #64748b; cursor: pointer; padding: 6px; border-radius: 6px; transition: all 0.2s; }
+.btn-per-edit, .btn-per-delete { background: transparent; border: none; cursor: pointer; padding: 6px; border-radius: 6px; transition: all 0.2s; }
+.btn-per-edit { color: #64748b; }
 .btn-per-edit:hover { color: var(--primary); background: #eff6ff; }
-.btn-per-delete { background: transparent; border: none; color: #94a3b8; cursor: pointer; padding: 6px; border-radius: 6px; transition: all 0.2s; }
+.btn-per-delete { color: #94a3b8; }
 .btn-per-delete:hover { color: var(--text-gelmedi); background: #fef2f2; }
 
 /* GÜN BUTONLARI */
@@ -114,7 +121,7 @@ td.sticky-col { background: white; }
 .day-btn.RAPOR { background-color: var(--bg-rapor); color: var(--text-rapor); border: 1px solid var(--border-rapor); }
 .day-btn:not(.BOS):hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.08); }
 
-/* MODAL CSS */
+/* MODALS */
 .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); }
 .modal-content { background-color: white; margin: 8% auto; border-radius: 20px; width: 380px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15); overflow: hidden; border: 1px solid var(--border-color); }
 .modal-header { background: #ffffff; padding: 24px 24px 10px 24px; display: flex; justify-content: space-between; align-items: center; }
@@ -125,3 +132,4 @@ td.sticky-col { background: white; }
 .form-group label { font-size: 0.85rem; color: #475569; font-weight: 600; }
 .form-group input, .form-group select { padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 0.95rem; outline: none; }
 .btn-save { width: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
+.btn-save:hover { opacity: 0.9; }
