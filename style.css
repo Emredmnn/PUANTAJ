@@ -9,12 +9,12 @@
     --primary: #2563eb;
     --excel-color: #10b981;
 
-    /* Hafta Sonu ve Resmi Tatil Tonları */
+    /* Takvim Renk Tanımları */
     --bg-weekend: #e2e8f0;       
     --bg-holiday: #ffe4e6;       
     --text-holiday: #9f1239;
 
-    /* Durum Renkleri */
+    /* Buton Renk Tonları */
     --bg-geldi: rgba(34, 197, 94, 0.12);   --text-geldi: #16a34a;   --border-geldi: rgba(34, 197, 94, 0.3);
     --bg-gelmedi: rgba(239, 68, 68, 0.1);  --text-gelmedi: #dc2626; --border-gelmedi: rgba(239, 68, 68, 0.25);
     --bg-hizin: rgba(234, 179, 8, 0.1);    --text-hizin: #ca8a04;   --border-hizin: rgba(234, 179, 8, 0.25);
@@ -27,11 +27,11 @@
 body { background-color: var(--main-bg); color: var(--text-dark); }
 .dashboard-container { display: flex; min-height: 100vh; }
 
-/* SOL ÜST MARKA & LOGO ALANI GÜNCELLEMESİ */
+/* SOL ÜST SABİT MARKA ALANI CSS YAPILANDIRMASI */
 .sidebar { width: 300px; background-color: var(--sidebar-bg); color: white; padding: 30px 24px; display: flex; flex-direction: column; shrink: 0; }
 .brand { display: flex; align-items: center; gap: 14px; padding-bottom: 25px; border-bottom: 1px solid #1e293b; margin-bottom: 10px; }
 
-/* Logonun yuvarlak/oval sınır taşmalarını önleyen premium kapsayıcı */
+/* Taşmayı ve kaymayı engelleyen logo kapsayıcı kartı */
 .logo-wrapper {
     width: 48px;
     height: 48px;
@@ -80,7 +80,7 @@ body { background-color: var(--main-bg); color: var(--text-dark); }
 .header-title h1 { font-size: 1.75rem; font-weight: 700; color: var(--text-dark); letter-spacing: -0.03em; }
 .header-title p { font-size: 0.95rem; color: var(--text-muted); margin-top: 4px; }
 
-/* DEPARTMAN FİLTRE BAR TASARIMI */
+/* DEPARTMAN FİLTRE BAR GRUBU */
 .filter-container { background: var(--card-bg); border-radius: 14px; padding: 15px 20px; margin-bottom: 25px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px; }
 .filter-label { font-size: 0.85rem; font-weight: 700; color: var(--text-dark); white-space: nowrap; }
 .filter-buttons-group { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -91,7 +91,7 @@ body { background-color: var(--main-bg); color: var(--text-dark); }
 .btn-excel { background: var(--excel-color); color: white; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15); shrink: 0; }
 .btn-excel:hover { background: #059669; transform: translateY(-1px); }
 
-/* ZAMAN KARTI */
+/* CLOCK WIDGET */
 .premium-clock-widget { background: #0f172a; border-radius: 14px; display: flex; overflow: hidden; border: 1px solid #1e293b; box-shadow: 0 4px 15px rgba(0,0,0,0.08); shrink: 0; }
 .widget-date-block { padding: 10px 18px; display: flex; align-items: center; gap: 10px; background: #1e293b; color: white; }
 #live-date-day { font-size: 1.8rem; font-weight: 800; color: #3b82f6; line-height: 1; }
@@ -101,7 +101,7 @@ body { background-color: var(--main-bg); color: var(--text-dark); }
 .widget-time-block { padding: 10px 20px; display: flex; align-items: center; justify-content: center; background: #0f172a; min-width: 110px; }
 #live-time { font-size: 1.25rem; font-weight: 700; color: #10b981; font-family: monospace; letter-spacing: 0.05em; }
 
-/* PUANTAJ TABLOSU */
+/* TABLO STİLLERİ */
 .puantaj-card { background: var(--card-bg); border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04); border: 1px solid var(--border-color); overflow: hidden; }
 .table-responsive { overflow-x: auto; width: 100%; }
 table { width: 100%; border-collapse: collapse; table-layout: fixed; }
