@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ED YAZILIM | Cloud Puantaj Otomasyonu</title>
     
-    <link rel="stylesheet" href="style.css?v=6.2.0">
+    <link rel="stylesheet" href="style.css?v=6.3.0">
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -65,7 +65,7 @@
                     <span class="pulse-dot" id="sync-status-dot"></span>
                     <p id="sync-status-text">Bulut Sunucusuna Bağlanıyor...</p>
                 </div>
-                <span>v6.2.0 Cloud Mobile</span>
+                <span>v6.3.0 Cloud Mobile</span>
             </div>
         </aside>
 
@@ -77,8 +77,12 @@
                 </div>
                 
                 <div class="action-group">
+                    <button onclick="gelmeyenlerModaliAc()" class="btn-absent">
+                        <i class="fa-solid fa-triangle-exclamation"></i> <span id="gelmeyenButonMetni">Gelmeyenler (-)</span>
+                    </button>
+
                     <button onclick="excelAktar()" class="btn-excel">
-                        <i class="fa-solid fa-file-excel"></i> Excel Raporu Al (.XLSX)
+                        <i class="fa-solid fa-file-excel"></i> Excel Raporu Al
                     </button>
 
                     <div class="premium-clock-widget">
@@ -114,6 +118,11 @@
             </div>
 
             <div class="puantaj-card desktop-view-only">
+                <div class="table-search-bar">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="panelAramaKutusu" oninput="aramaYap()" placeholder="Personel ad soyad yazarak hızlı ara...">
+                </div>
+
                 <div class="table-responsive">
                     <table id="anaTablo">
                         <thead>
@@ -126,7 +135,13 @@
                 </div>
             </div>
 
-            <div class="mobile-view-only" id="mobilKartKapsayici"></div>
+            <div class="mobile-view-only">
+                <div class="table-search-bar" style="margin-bottom: 12px; border-radius: 12px;">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="mobilAramaKutusu" oninput="aramaYapMobil()" placeholder="Personel ara...">
+                </div>
+                <div id="mobilKartKapsayici"></div>
+            </div>
         </main>
     </div>
 
@@ -216,6 +231,24 @@
         </div>
     </div>
 
-    <script src="script.js?v=6.2.0"></script>
+    <div id="gelmeyenlerModal" class="modal">
+        <div class="modal-content" style="width: 90%; max-width: 460px; border-radius: 20px;">
+            <div class="modal-header" style="background: #f87171; color: white;">
+                <div class="modal-title-group" style="color: white;">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <div>
+                        <h3 id="gelmeyenlerModalBaslik" style="font-size: 1.1rem;">İşe Gelmeyen Personel Listesi</h3>
+                        <p id="gelmeyenlerModalTarih" style="font-size: 0.78rem; opacity: 0.9; margin-top: 2px;">Seçili Gün Tarihi</p>
+                    </div>
+                </div>
+                <span class="close-btn" onclick="gelmeyenlerModalKapat()" style="color: white;">&times;</span>
+            </div>
+            <div class="modal-body" style="padding: 20px; max-height: 380px; overflow-y: auto;">
+                <div id="gelmeyenlerSirketListesi" class="mesai-detay-listesi"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js?v=6.3.0"></script>
 </body>
 </html>
