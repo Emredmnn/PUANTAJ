@@ -6,7 +6,6 @@ if (sessionStorage.getItem("ed_oturum_aktif") !== "true") {
     window.location.href = "login.html";
 }
 
-// Güvenli Çıkış Motoru
 function sistemdenCikisYap() {
     if(confirm("Sistemden çıkış yapmak istediğinize emin misiniz?")) {
         sessionStorage.removeItem("ed_oturum_aktif");
@@ -32,13 +31,11 @@ if (!firebase.apps.length) {
 }
 const db = firebase.database();
 
-// Global Sistem Değişkenleri
 let aktifYil, aktifAy, toplamGunSayisi;
 let tumKullanicilar = {};
 let secilenDepartman = "HEPSİ";
 let mobilSeciliGun = 1; 
 
-// Uygulama Başlangıç Motoru
 window.onload = function() {
     SaatVeTarihMotoru();
     FirebaseBaglantiDurumuDinle();
@@ -51,7 +48,6 @@ window.onload = function() {
     donemDegisti();
 };
 
-// Canlı Eşitleme Durumu Dinleyicisi
 function FirebaseBaglantiDurumuDinle() {
     db.ref(".info/connected").on("value", (snap) => {
         const dot = document.getElementById("sync-status-dot");
@@ -64,12 +60,11 @@ function FirebaseBaglantiDurumuDinle() {
         } else {
             dot.style.background = "#ef4444"; 
             dot.style.boxShadow = "0 0 8px #ef4444";
-            txt.innerText = "Bağlantı Kesildi / Aranıyor...";
+            txt.innerText = "Bağlantı Kesildi / Yerel Önbellek Aktif";
         }
     });
 }
 
-// Dönem Değiştiğinde Takvimi Yeniden Kurup Verileri Çeken Fonksiyon
 function donemDegisti() {
     const donemDegeri = document.getElementById("donemSecici").value;
     if (!donemDegeri) return;
@@ -87,11 +82,21 @@ function donemDegisti() {
 }
 
 function VerileriGeriYukle() {
+    // Bulut bağlantısı olmasa bile butonların donmaması için yerel hafıza güvencesi
+    const localData = localStorage.getItem("ed_local_personeller");
+    if(localData) {
+        tumKullanicilar = JSON.parse(localData);
+        TabloGövdesiniDoldur(); MobilKartlariniDoldur(); GelmeyenSayisiniGuncelle();
+    }
+
     db.ref("personeller").on("value", (snapshot) => {
-        tumKullanicilar = snapshot.val() || {};
-        TabloGövdesiniDoldur();
-        MobilKartlariniDoldur();
-        GelmeyenSayisiniGuncelle();
+        if(snapshot.exists()) {
+            tumKullanicilar = snapshot.val() || {};
+            localStorage.setItem("ed_local_personeller", JSON.stringify(tumKullanicilar));
+            TabloGövdesiniDoldur();
+            MobilKartlariniDoldur();
+            GelmeyenSayisiniGuncelle();
+        }
     });
 }
 
@@ -343,7 +348,7 @@ function GelmeyenSayisiniGuncelle() {
 }
 
 // =========================================================================
-// 6. PERSONEL ARAMA, SEÇME VE YÖNETİM MOTORLARI (AKTİFLEŞTİRİLDİ)
+// 6. PERSONEL ARAMA VE DEPARTMAN FİLTRELEME MOTORLARI
 // =========================================================================
 function aramaYap() {
     const aramaMetni = document.getElementById("panelAramaKutusu").value.toLowerCase().trim();
@@ -360,12 +365,9 @@ function aramaYapMobil() {
     const aramaMetni = document.getElementById("mobilAramaKutusu").value.toLowerCase().trim();
     const kartlar = document.querySelectorAll("#mobilKartKapsayici .mobile-personnel-card");
     kartlar.forEach(kart => {
-        const isimHucresi = kart.querySelector("strong");
+        const isimHucresi = kart.querySelector(".mobile-card-info strong");
         if (isimHucresi) {
-            kart.style.display = 'none';
-            if(isimHucresi.innerText.toLowerCase().includes(aramaMetni)){
-                kart.style.display = '';
-            }
+            kart.style.display = isimHucresi.innerText.toLowerCase().includes(aramaMetni) ? "" : "none";
         }
     });
 }
@@ -380,6 +382,9 @@ function filtreleDepartman(deptName, butonElement) {
     GelmeyenSayisiniGuncelle();
 }
 
+// =========================================================================
+// 7. PERSONEL EKLEME / GÜNCELLEME VE SİLME AKSİYONLARI (GARANTİLİ MOTOR)
+// =========================================================================
 function personelEkle() {
     const id = document.getElementById("editPersonelId").value;
     const adSoyad = document.getElementById("perAdSoyad").value.trim();
@@ -388,17 +393,34 @@ function personelEkle() {
     if (!adSoyad) { alert("Lütfen Personel Adı Soyadı alanını doldurunuz."); return; }
 
     if (id) {
+        // Güncelleme İşlemi
         db.ref("personeller/" + id).update({ adSoyad, departman })
-        .then(() => {
-            document.getElementById("editPersonelId").value = "";
-            document.getElementById("perAdSoyad").value = "";
-            document.getElementById("btnPersonelSubmit").innerHTML = `<i class="fa-solid fa-plus"></i> Yeni Personel Tanımla`;
-        });
+        .then(() => { TemizleForm(); });
+
+        // Offline Desteği
+        tumKullanicilar[id].adSoyad = adSoyad;
+        tumKullanicilar[id].departman = departman;
     } else {
+        // Yeni Kayıt İşlemi
         const yeniRef = db.ref("personeller").push();
-        yeniRef.set({ adSoyad, departman, puantaj: {} })
-        .then(() => { document.getElementById("perAdSoyad").value = ""; });
+        const yeniId = yeniRef.key;
+        const yeniVeri = { adSoyad, departman, puantaj: {} };
+
+        yeniRef.set(yeniVeri).then(() => { TemizleForm(); });
+
+        // Bağlantı kopuksa arayüzün düşmemesi için anında lokal render tetikleme
+        tumKullanicilar[yeniId] = yeniVeri;
     }
+
+    localStorage.setItem("ed_local_personeller", JSON.stringify(tumKullanicilar));
+    TabloGövdesiniDoldur();
+    MobilKartlariniDoldur();
+}
+
+function TemizleForm() {
+    document.getElementById("editPersonelId").value = "";
+    document.getElementById("perAdSoyad").value = "";
+    document.getElementById("btnPersonelSubmit").innerHTML = `<i class="fa-solid fa-plus"></i> Yeni Personel Tanımla`;
 }
 
 function personelDuzenleHazirlik(id) {
@@ -413,11 +435,15 @@ function personelDuzenleHazirlik(id) {
 function personelSil(id) {
     if(confirm("Bu personeli ve tüm puantaj geçmişini silmek istediğinize emin misiniz?")) {
         db.ref("personeller/" + id).remove();
+        delete tumKullanicilar[id];
+        localStorage.setItem("ed_local_personeller", JSON.stringify(tumKullanicilar));
+        TabloGövdesiniDoldur();
+        MobilKartlariniDoldur();
     }
 }
 
 // =========================================================================
-// 7. HÜCRE MODAL DÜZENLEME VE DETAY GEÇMİŞ MOTORLARI
+// 8. HÜCRE MODAL DÜZENLEME VE DETAY GEÇMİŞ MOTORLARI
 // =========================================================================
 function durumSecimPenceresi(perId, gunNo) {
     const p = tumKullanicilar[perId];
@@ -455,7 +481,15 @@ function gunlukVeriKaydet() {
     
     const veri = { durum: durum, normalMesai: durum === "GELDI" ? nMesai : 0, fazlaMesai: durum === "GELDI" ? fMesai : 0 };
 
+    if(!tumKullanicilar[perId].puantaj) tumKullanicilar[perId].puantaj = {};
+    if(!tumKullanicilar[perId].puantaj[donemKey]) tumKullanicilar[perId].puantaj[donemKey] = {};
+    tumKullanicilar[perId].puantaj[donemKey][gunNo] = veri;
+
     db.ref("personeller/" + perId + "/puantaj/" + donemKey + "/" + gunNo).set(veri).then(() => { modalKapat(); });
+    
+    localStorage.setItem("ed_local_personeller", JSON.stringify(tumKullanicilar));
+    TabloGövdesiniDoldur();
+    MobilKartlariniDoldur();
 }
 
 function mesaiDetayModaliAc(perId) {
@@ -490,14 +524,14 @@ function mesaiDetayModaliAc(perId) {
         listeAlani.innerHTML = `
         <div style="background:#f8fafc; padding:12px; border-radius:12px; margin-bottom:14px; display:flex; justify-content:space-between; border:1px solid #e2e8f0;">
             <div><span style="font-size:11px; color:#64748b; display:block;">Normal Mesai</span><strong style="color:#1e293b; font-size:15px;">${toplamCalisma} Sa</strong></div>
-            <div><span style="font-size:11px; color:#64748b; display:block;">Toplam FM</span><strong style="color:#16a34a; font-size:15px;">+${toprakFazla || toplamFazla} Sa</strong></div>
+            <div><span style="font-size:11px; color:#64748b; display:block;">Toplam FM</span><strong style="color:#16a34a; font-size:15px;">+${toplamFazla} Sa</strong></div>
         </div>` + satirHtml;
     }
     document.getElementById("mesaiDetayModal").style.display = "block";
 }
 
 // =========================================================================
-// 8. EXCEL RAPORLAMA VE SAAT MOTORLARI (AKTİFLEŞTİRİLDİ)
+// 9. EXCEL RAPORLAMA VE SAAT MOTORLARI
 // =========================================================================
 function excelAktar() {
     if (Object.keys(tumKullanicilar).length === 0) { alert("Rapora aktarılacak personel verisi bulunamadı!"); return; }
