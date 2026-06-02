@@ -9,12 +9,12 @@
     --primary: #2563eb;
     --excel-color: #10b981;
 
-    /* Hafta Sonu ve Resmi Tatil Yoğun Tonları */
+    /* Hafta Sonu ve Resmi Tatil Tonları */
     --bg-weekend: #e2e8f0;       
     --bg-holiday: #ffe4e6;       
     --text-holiday: #9f1239;
 
-    /* Premium Pastel Durum Tonları */
+    /* Durum Renkleri */
     --bg-geldi: rgba(34, 197, 94, 0.12);   --text-geldi: #16a34a;   --border-geldi: rgba(34, 197, 94, 0.3);
     --bg-gelmedi: rgba(239, 68, 68, 0.1);  --text-gelmedi: #dc2626; --border-gelmedi: rgba(239, 68, 68, 0.25);
     --bg-hizin: rgba(234, 179, 8, 0.1);    --text-hizin: #ca8a04;   --border-hizin: rgba(234, 179, 8, 0.25);
@@ -27,15 +27,35 @@
 body { background-color: var(--main-bg); color: var(--text-dark); }
 .dashboard-container { display: flex; min-height: 100vh; }
 
-/* SIDEBAR & BRAND LOGO */
+/* SOL ÜST MARKA & LOGO ALANI GÜNCELLEMESİ */
 .sidebar { width: 300px; background-color: var(--sidebar-bg); color: white; padding: 30px 24px; display: flex; flex-direction: column; shrink: 0; }
-.brand { display: flex; align-items: center; gap: 14px; padding-bottom: 25px; border-bottom: 1px solid #1e293b; }
-.brand-logo-img { width: 44px; height: 44px; border-radius: 12px; object-fit: contain; }
-.logo-icon { background: linear-gradient(135deg, #3b82f6, #2563eb); width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
-.brand-text h3 { font-size: 1.1rem; font-weight: 700; margin: 0; letter-spacing: -0.02em; color: #ffffff; }
-.brand-text p { font-size: 0.75rem; color: #3b82f6; margin-top: 2px; font-weight: 600; text-transform: uppercase; }
+.brand { display: flex; align-items: center; gap: 14px; padding-bottom: 25px; border-bottom: 1px solid #1e293b; margin-bottom: 10px; }
 
-.sidebar-section { margin-top: 25px; }
+/* Logonun yuvarlak/oval sınır taşmalarını önleyen premium kapsayıcı */
+.logo-wrapper {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #171e2e;
+    border-radius: 12px;
+    padding: 4px;
+    border: 1px solid #222f43;
+    overflow: hidden;
+    shrink: 0;
+}
+.brand-logo-img { 
+    max-width: 100%; 
+    max-height: 100%; 
+    object-fit: contain; 
+}
+
+.logo-icon { background: linear-gradient(135deg, #3b82f6, #2563eb); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+.brand-text h3 { font-size: 1.15rem; font-weight: 700; margin: 0; letter-spacing: -0.02em; color: #ffffff; }
+.brand-text p { font-size: 0.72rem; color: #3b82f6; margin-top: 1px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
+
+.sidebar-section { margin-top: 20px; }
 .sidebar-section h4 { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; font-weight: 700; }
 .sidebar-form { display: flex; flex-direction: column; gap: 12px; }
 .input-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
@@ -60,7 +80,7 @@ body { background-color: var(--main-bg); color: var(--text-dark); }
 .header-title h1 { font-size: 1.75rem; font-weight: 700; color: var(--text-dark); letter-spacing: -0.03em; }
 .header-title p { font-size: 0.95rem; color: var(--text-muted); margin-top: 4px; }
 
-/* DEPARTMAN FİLTRE BAR TASARIMI (Yeni Premium Grid) */
+/* DEPARTMAN FİLTRE BAR TASARIMI */
 .filter-container { background: var(--card-bg); border-radius: 14px; padding: 15px 20px; margin-bottom: 25px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px; }
 .filter-label { font-size: 0.85rem; font-weight: 700; color: var(--text-dark); white-space: nowrap; }
 .filter-buttons-group { display: flex; gap: 8px; flex-wrap: wrap; }
