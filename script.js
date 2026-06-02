@@ -346,3 +346,101 @@ function excelAktar() {
     XLSX.utils.book_append_sheet(wb, ws, "Puantaj Raporu");
     XLSX.writeFile(wb, `ED_Yazilim_Puantaj_Raporu_${aktifFiltreDepartman}.xlsx`);
 }
+// =========================================================================
+// MOBİL GÖRÜNÜM MOTORU VE AKILLI KART ALTYAPISI (v6.1.0 İLAVESİ)
+// =========================================================================
+
+// Sayfa ilk açıldığında veya dönem değiştiğinde mobil gün şeridini 1. gün olarak tetikler
+const eskiBasliklariCiz = basliklariCiz;
+basliklariCiz = function() {
+    eskiBasliklariCiz();
+    mobilGunSeridiniCiz();
+}
+
+const eskiTabloyuCiz = tabloyuCiz;
+tabloyuCiz = function() {
+    eskiTabloyuCiz();
+    mobilKartlariCiz();
+}
+
+function mobilGunSeridiniCiz() {
+    const serit = document.getElementById("mobilGunSeridi");
+    if(!serit) return;
+    serit.innerHTML = "";
+    
+    if(seciliGun === null) seciliGun = 1; // Başlangıçta 1. günü seç
+    const toplamGun = ayinGunSayisi(mevcutYil, mevcutAy);
+    const gunAdlari = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
+
+    for (let g = 1; g <= toplamGun; g++) {
+        const d = new Date(mevcutYil, mevcutAy, g);
+        const btn = document.createElement("button");
+        btn.type = "button";
+        
+        let cls = "btn-mobile-day";
+        if(g === seciliGun) cls += " active";
+        if(resmiTatilMi(mevcutAy, g)) cls += " m-holiday";
+        else if(d.getDay() === 0 || d.getDay() === 6) cls += " m-weekend";
+        
+        btn.className = cls;
+        btn.innerHTML = `${g}<span>${gunAdlari[d.getDay()]}</span>`;
+        btn.onclick = () => {
+            seciliGun = g;
+            document.querySelectorAll(".btn-mobile-day").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            mobilKartlariCiz();
+        };
+        serit.appendChild(btn);
+    }
+}
+
+function mobilKartlariCiz() {
+    const konteyner = document.getElementById("mobilKartKapsayici");
+    if(!konteyner) return;
+    konteyner.innerHTML = "";
+
+    const donemKey = `${mevcutYil}-${mevcutAy}`;
+    let filtrelenmisList = otomasyonVerisi.filter(p => p && p.donem === donemKey);
+    if (aktifFiltreDepartman !== "HEPSİ") { filtrelenmisList = filtrelenmisList.filter(p => p.grup === aktifFiltreDepartman); }
+
+    if (filtrelenmisList.length === 0) {
+        konteyner.innerHTML = `<div style="background:white; padding:20px; border-radius:14px; text-align:center; color:var(--text-muted); font-size:0.9rem; border:1px solid var(--border-color);">Bu departmanda kayıtlı personel bulunamadı.</div>`;
+        return;
+    }
+
+    filtrelenmisList.forEach(per => {
+        const kart = document.createElement("div");
+        kart.className = "mobile-personnel-card";
+
+        const gunVerisi = (per.gunler && per.gunler[seciliGun]) ? per.gunler[seciliGun] : { durum: "BOS", normalMesai: 0, fazlaMesai: 0 };
+        const ekstraMesaiSaati = toplamFazlaMesaiHesapla(per);
+
+        // Durum sembol metni belirleme
+        let harf = "-";
+        if (gunVerisi.durum === "GELDI") harf = "G";
+        else if (gunVerisi.durum === "GELMEDI") harf = "YOK";
+        else if (gunVerisi.durum === "H_IZIN") harf = "H.İ";
+        else if (gunVerisi.durum === "Y_IZIN") harf = "Y.İ";
+        else if (gunVerisi.durum === "C_IZIN") harf = "C.İ";
+        else if (gunVerisi.durum === "RAPOR") harf = "R";
+
+        kart.innerHTML = `
+            <div class="m-card-left">
+                <div class="m-per-meta">
+                    <span class="m-per-name">${per.ad}</span>
+                    <span class="m-per-role">${per.grup}</span>
+                    <div class="m-per-actions-row">
+                        <span class="m-btn-mini" onclick="mesaiDetayModaliAc(${per.id})" style="color:var(--primary); font-weight:600;"><i class="fa-solid fa-clock-history"></i> Geçmiş</span>
+                        <span class="m-btn-mini" onclick="personelDuzenleModaliAc(${per.id})"><i class="fa-solid fa-user-pen"></i> Düzenle</span>
+                        <span class="m-btn-mini" onclick="personelSil(${per.id})" style="color:#ef4444;"><i class="fa-solid fa-user-xmark"></i> Sil</span>
+                    </div>
+                </div>
+            </div>
+            <div class="m-card-right">
+                <div class="total-hours-badge" onclick="mesaiDetayModaliAc(${per.id})">+${ekstraMesaiSaati} Sa</div>
+                <button class="day-btn ${gunVerisi.durum}" onclick="chefDüzenlemeModaliAc(${per.id}, ${seciliGun}, ${JSON.stringify(gunVerisi).getCleanString ? JSON.stringify(gunVerisi).getCleanString() : JSON.stringify(gunVerisi)})">${harf}</button>
+            </div>
+        `;
+        konteyner.appendChild(kart);
+    });
+}
