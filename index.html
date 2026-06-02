@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ED YAZILIM | Enterprise Puantaj Otomasyonu</title>
+    <title>ED YAZILIM | Cloud Puantaj Otomasyonu</title>
     
-    <link rel="stylesheet" href="style.css?v=5.7.0">
+    <link rel="stylesheet" href="style.css?v=6.0.0">
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -62,10 +62,10 @@
 
             <div class="sidebar-footer">
                 <div class="status-indicator">
-                    <span class="pulse-dot"></span>
-                    <p>Bulut Eşitleme Aktif (Multi-Device)</p>
+                    <span class="pulse-dot" id="sync-status-dot"></span>
+                    <p id="sync-status-text">Bulut Sunucusuna Bağlanıyor...</p>
                 </div>
-                <span>v5.7.0 Enterprise</span>
+                <span>v6.0.0 Cloud Sync</span>
             </div>
         </aside>
 
@@ -73,7 +73,7 @@
             <header class="top-header">
                 <div class="header-title">
                     <h1>Aylık Personel Puantaj Paneli</h1>
-                    <p>Eşzamanlı çoklu cihaz desteği, dini bayram entegrasyonu ve mesai detay geçmişi</p>
+                    <p>Eşzamanlı çoklu cihaz desteği, bulut veritabanı entegrasyonu ve mesai geçmişi</p>
                 </div>
                 
                 <div class="action-group" style="display: flex; gap: 20px; align-items: center;">
@@ -199,18 +199,17 @@
                     <i class="fa-solid fa-clock-history" style="color: #3b82f6;"></i>
                     <div>
                         <h3 id="detayModalPersonelAdi" style="font-size: 1.1rem; font-weight: 700;">Personel Mesai Geçmişi</h3>
-                        <p id="detayModalDonemYazi" style="font-size: 0.75rem; color: #94a3b8; font-weight: 500; margin-top: 2px;">Haziran 2026 Dönemi</p>
+                        <p id="detayModalDonemYazi" style="font-size: 0.75rem; color: #94a3b8; font-weight: 500; margin-top: 2px;">Dönem Detay Listesi</p>
                     </div>
                 </div>
                 <span class="close-btn" onclick="mesaiDetayModalKapat()" style="color: #94a3b8; opacity: 0.8;">&times;</span>
             </div>
             <div class="modal-body" style="padding: 20px; max-height: 400px; overflow-y: auto;">
-                <div id="mesaiDetayListesi" class="mesai-detay-listesi">
-                    </div>
+                <div id="mesaiDetayListesi" class="mesai-detay-listesi"></div>
             </div>
         </div>
     </div>
 
-    <script src="script.js?v=5.7.0"></script>
+    <script src="script.js?v=6.0.0"></script>
 </body>
 </html>
