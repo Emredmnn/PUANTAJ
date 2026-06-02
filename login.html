@@ -21,8 +21,18 @@
         body { background-color: var(--bg-dark); color: var(--text-light); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
         .login-container { width: 100%; max-width: 420px; background: var(--card-bg); padding: 40px 30px; border-radius: 24px; border: 1px solid var(--border-color); box-shadow: 0 20px 40px rgba(0,0,0,0.3); text-align: center; }
         .login-header { margin-bottom: 35px; }
-        .logo-box { width: 65px; height: 65px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; color: var(--primary); font-size: 1.6rem; }
-        .login-header h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 5px; }
+        
+        /* LOGO ALANI - PENCEREYE TAM SIĞACAK VE BÜYÜK DURACAK ŞEKİLDE AYARLANDI */
+        .logo-wrapper { 
+            display: flex; align-items: center; justify-content: center; 
+            width: 75px; height: 75px; background: var(--input-bg); 
+            border-radius: 16px; padding: 0; border: 1px solid var(--border-color); 
+            overflow: hidden; margin: 0 auto 15px auto; flex-shrink: 0;
+        }
+        .brand-logo-img { width: 100%; height: 100%; object-fit: cover; }
+        .logo-icon { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1.6rem; }
+        
+        .login-header h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 5px; color: #ffffff; letter-spacing: 0.02em; }
         .login-header p { font-size: 0.85rem; color: var(--text-muted); }
         .form-group { position: relative; margin-bottom: 20px; text-align: left; }
         .form-group label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
@@ -44,7 +54,10 @@
 
     <div class="login-container">
         <div class="login-header">
-            <div class="logo-box"><i class="fa-solid fa-code"></i></div>
+            <div class="logo-wrapper">
+                <img src="logo.png.png" alt="ED YAZILIM" class="brand-logo-img" onerror="this.style.display='none'; document.getElementById('logo-backup').style.display='flex';">
+                <div id="logo-backup" class="logo-icon" style="display:none;"><i class="fa-solid fa-code"></i></div>
+            </div>
             <h2>ED YAZILIM</h2>
             <p>Cloud Puantaj Otomasyonu Giriş Sistemi</p>
         </div>
@@ -89,7 +102,6 @@
             }
         };
 
-        // İstediğin Bahçelievler & iss Kimlik Bilgileri
         const TANIMLI_USER = "Bahçelievler";
         const TANIMLI_PASS = "iss";
 
