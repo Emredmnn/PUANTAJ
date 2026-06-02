@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ED YAZILIM | Otomasyon Giriş Paneli</title>
-    
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
         :root {
             --bg-dark: #0b0f19;
@@ -19,37 +17,26 @@
             --text-light: #ffffff;
             --text-muted: #94a3b8;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background-color: var(--bg-dark); color: var(--text-light); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
-
         .login-container { width: 100%; max-width: 420px; background: var(--card-bg); padding: 40px 30px; border-radius: 24px; border: 1px solid var(--border-color); box-shadow: 0 20px 40px rgba(0,0,0,0.3); text-align: center; }
-        
         .login-header { margin-bottom: 35px; }
         .logo-box { width: 65px; height: 65px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; color: var(--primary); font-size: 1.6rem; }
         .login-header h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 5px; }
         .login-header p { font-size: 0.85rem; color: var(--text-muted); }
-
         .form-group { position: relative; margin-bottom: 20px; text-align: left; }
         .form-group label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
-        
         .input-wrapper { position: relative; display: flex; align-items: center; }
         .input-wrapper i.input-icon { position: absolute; left: 16px; color: var(--text-muted); font-size: 1rem; }
         .form-group input { width: 100%; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-light); padding: 14px 45px 14px 45px; border-radius: 12px; font-size: 0.95rem; outline: none; transition: all 0.2s; }
         .form-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
-        
-        /* Şifre Göster/Gizle Butonu */
-        .toggle-password { position: absolute; right: 16px; color: var(--text-muted); cursor: pointer; padding: 5px; font-size: 1rem; user-select: none; }
+        .toggle-password { position: absolute; right: 16px; color: var(--text-muted); cursor: pointer; padding: 5px; font-size: 1rem; user-select: none; z-index: 5; }
         .toggle-password:hover { color: var(--text-light); }
-
-        /* Beni Hatırla Düzeni */
         .form-actions { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; font-size: 0.88rem; }
         .remember-me { display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-muted); }
         .remember-me input { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
-
         .btn-login { width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); }
         .btn-login:hover { background: var(--primary-hover); }
-
         #error-message { color: #ef4444; font-size: 0.85rem; font-weight: 600; margin-top: 15px; display: none; }
     </style>
 </head>
@@ -57,9 +44,7 @@
 
     <div class="login-container">
         <div class="login-header">
-            <div class="logo-box">
-                <i class="fa-solid fa-code"></i>
-            </div>
+            <div class="logo-box"><i class="fa-solid fa-code"></i></div>
             <h2>ED YAZILIM</h2>
             <p>Cloud Puantaj Otomasyonu Giriş Sistemi</p>
         </div>
@@ -69,7 +54,7 @@
                 <label>Kullanıcı Adı</label>
                 <div class="input-wrapper">
                     <i class="fa-solid fa-user input-icon"></i>
-                    <input type="text" id="kullaniciAdi" placeholder="Kullanıcı adınızı girin" required>
+                    <input type="text" id="kullaniciAdi" placeholder="Kullanıcı adınızı girin" required autocomplete="username">
                 </div>
             </div>
 
@@ -77,7 +62,7 @@
                 <label>Şifre</label>
                 <div class="input-wrapper">
                     <i class="fa-solid fa-lock input-icon"></i>
-                    <input type="password" id="sifre" placeholder="••••••••" required>
+                    <input type="password" id="sifre" placeholder="••••••••" required autocomplete="current-password">
                     <i class="fa-solid fa-eye toggle-password" id="sifreGosterButonu" onclick="sifreToggle()"></i>
                 </div>
             </div>
@@ -90,40 +75,35 @@
             </div>
 
             <button type="submit" class="btn-login">Sisteme Giriş Yap</button>
-            <div id="error-message">Hatalı Kullanıcı Adı veya Şifre!</div>
+            <div id="error-message">Kullanıcı adı veya şifre hatalı!</div>
         </form>
     </div>
 
     <script>
-        // Sayfa yüklendiğinde Beni Hatırla kontrolü yap
         window.onload = function() {
             const kaydedilenKullanici = localStorage.getItem("ed_kullanici_adi");
             const kaydedilenBeniHatirla = localStorage.getItem("ed_beni_hatirla");
-
             if (kaydedilenBeniHatirla === "true" && kaydedilenKullanici) {
                 document.getElementById("kullaniciAdi").value = kaydedilenKullanici;
                 document.getElementById("beniHatirla").checked = true;
             }
         };
 
-        // Prototip Sabit Kullanıcı Bilgileri (İleride Firebase'e bağlayabiliriz şefim)
+        // İstediğin Bahçelievler & iss Kimlik Bilgileri
         const TANIMLI_USER = "Bahçelievler";
         const TANIMLI_PASS = "iss";
 
-        // Giriş Kontrol Motoru
         function sistemeGirisYap(e) {
             e.preventDefault();
-            
             const kAdi = document.getElementById("kullaniciAdi").value.trim();
             const sifre = document.getElementById("sifre").value;
             const beniHatirla = document.getElementById("beniHatirla").checked;
             const hataMesaji = document.getElementById("error-message");
 
-            // Doğrulama Senaryosu
             if (kAdi === TANIMLI_USER && sifre === TANIMLI_PASS) {
                 hataMesaji.style.display = "none";
+                sessionStorage.setItem("ed_oturum_aktif", "true");
 
-                // Beni Hatırla Mantığı
                 if (beniHatirla) {
                     localStorage.setItem("ed_kullanici_adi", kAdi);
                     localStorage.setItem("ed_beni_hatirla", "true");
@@ -131,20 +111,15 @@
                     localStorage.removeItem("ed_kullanici_adi");
                     localStorage.removeItem("ed_beni_hatirla");
                 }
-
-                alert("Giriş Başarılı! Panale yönlendiriliyorsunuz şefim...");
-                window.location.href = "index.html"; // Puantaj ana ekranına yönlendirir
+                window.location.href = "index.html";
             } else {
                 hataMesaji.style.display = "block";
-                hataMesaji.innerText = "Kullanıcı adı veya şifre hatalı!";
             }
         }
 
-        // Şifre Göster / Gizle Motoru
         function sifreToggle() {
             const sifreInput = document.getElementById("sifre");
             const ikon = document.getElementById("sifreGosterButonu");
-
             if (sifreInput.type === "password") {
                 sifreInput.type = "text";
                 ikon.classList.remove("fa-eye");
